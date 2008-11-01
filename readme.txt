@@ -2,7 +2,7 @@
 Contributors: wnorris 
 Tags: shibboleth, authentication, login, saml
 Tested up to: 2.6.3
-Stable tag: trunk
+Stable tag: 0.1
 
 Allows WordPress to externalize user authentication and account creation to a [Shibboleth][] Service Provider.
 
