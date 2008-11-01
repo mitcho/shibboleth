@@ -524,12 +524,7 @@ function shibboleth_insert_htaccess() {
 	if (got_mod_rewrite()) {
 		$htaccess = get_home_path() . '.htaccess';
 		$rules = array('AuthType Shibboleth', 'Require Shibboleth');
-		$result = insert_with_markers($htaccess, 'Shibboleth', $rules);
-		if ($result) {
-			error_log( 'yes' );
-		} else {
-			error_log( 'no' );
-		}
+		insert_with_markers($htaccess, 'Shibboleth', $rules);
 	}
 
 }
