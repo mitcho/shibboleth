@@ -16,14 +16,22 @@ Allows WordPress to externalize user authentication and account creation to a [S
 
 == Installation ==
 
-This plugin follows the [standard WordPress installation method][]:
+First and foremost, you must have the Shibboleth Service Provider [properly
+installed][] and working.  If you don't have Shibboleth working yet, I assure
+you that you won't get this plugin to work.  This plugin expects Shibboleth to
+be configured to use "lazy sessions", so ensure that you have Shibboleth
+configured with requireSession set to "false".  Upon activation, the plugin
+will attempt to set the appropriate directives in WordPress's .htaccess file.
+If it is unable to do so, you can add this manually:
 
-1. Upload the `openid` folder to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Configure the plugin through the 'OpenID' section of the 'Options' menu
+    AuthType Shibboleth
+    Require Shibboleth
 
-[standard WordPress installation method]: http://codex.wordpress.org/Managing_Plugins#Installing_Plugins
+Upload this plugin to your WordPress plugins folder (probably
+/wp-content/plugins), and activate it through the WordPress admin panel.
+Configure it from the Options page.
 
+[properly installed]: https://spaces.internet2.edu/display/SHIB2/Installation
 
 == Frequently Asked Questions ==
 

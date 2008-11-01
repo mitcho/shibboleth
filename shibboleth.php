@@ -12,7 +12,8 @@
 register_activation_hook('shibboleth/shibboleth.php', 'shibboleth_activate_plugin');
 add_action('init', 'shibboleth_wp_login');
 add_action('admin_menu', 'shibboleth_admin_panels');
-add_action('profile_personal_options', 'shibboleth_personal_options');
+add_action('profile_personal_options', 'shibboleth_profile_personal_options');
+add_action('personal_options_update', 'shibboleth_personal_options_update');
 
 
 /**
@@ -46,6 +47,8 @@ function shibboleth_activate_plugin() {
 
 	add_option('shibboleth_update_users', true);
 	add_option('shibboleth_update_roles', true);
+
+	shibboleth_insert_htaccess();
 }
 
 
@@ -263,7 +266,7 @@ function shibboleth_login_form() {
  * For WordPress accounts that were created by Shibboleth, limit what profile 
  * attributes they can modify.
  */
-function shibboleth_personal_options() {
+function shibboleth_profile_personal_options() {
 	$user = wp_get_current_user();
 	if (get_usermeta($user->ID, 'shibboleth_account')) {
 		add_filter('show_password_fields', create_function('$v', 'return false;'));
@@ -281,6 +284,39 @@ function shibboleth_personal_options() {
 	}
 }
 
+/**
+ * Ensure profile data isn't updated by the user
+ */
+function shibboleth_personal_options_update() {
+	if (get_option('shibboleth_update_users')) {
+		add_filter('pre_user_first_name', 'shibboleth_pre_first_name');
+		add_filter('pre_user_last_name', 'shibboleth_pre_last_name');
+		add_filter('pre_user_nickname', 'shibboleth_pre_nickname');
+		add_filter('pre_user_display_name', 'shibboleth_pre_display_name');
+		add_filter('pre_user_email', 'shibboleth_pre_email');
+	}
+}
+
+function shibboleth_pre_first_name($name) {
+	global $current_user;
+	return $current_user->first_name;
+}
+function shibboleth_pre_last_name($name) {
+	global $current_user;
+	return $current_user->last_name;
+}
+function shibboleth_pre_nickname($name) {
+	global $current_user;
+	return $current_user->nickname;
+}
+function shibboleth_pre_display_name($name) {
+	global $current_user;
+	return $current_user->display_name;
+}
+function shibboleth_pre_email($email) {
+	global $current_user;
+	return $current_user->user_email;
+}
 
 
 /**
@@ -479,4 +515,23 @@ function shibboleth_options_page() {
 ';
 
 }
+
+
+/**
+ * Insert Shibboleth directives into .htaccess file.
+ */
+function shibboleth_insert_htaccess() {
+	if (got_mod_rewrite()) {
+		$htaccess = get_home_path() . '.htaccess';
+		$rules = array('AuthType Shibboleth', 'Require Shibboleth');
+		$result = insert_with_markers($htaccess, 'Shibboleth', $rules);
+		if ($result) {
+			error_log( 'yes' );
+		} else {
+			error_log( 'no' );
+		}
+	}
+
+}
+
 ?>
