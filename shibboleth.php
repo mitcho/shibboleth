@@ -288,7 +288,8 @@ function shibboleth_profile_personal_options() {
  * Ensure profile data isn't updated by the user
  */
 function shibboleth_personal_options_update() {
-	if (get_option('shibboleth_update_users')) {
+	$user = wp_get_current_user();
+	if (get_usermeta($user->ID, 'shibboleth_account') && get_option('shibboleth_update_users')) {
 		add_filter('pre_user_first_name', 'shibboleth_pre_first_name');
 		add_filter('pre_user_last_name', 'shibboleth_pre_last_name');
 		add_filter('pre_user_nickname', 'shibboleth_pre_nickname');
