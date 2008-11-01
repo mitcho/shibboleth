@@ -33,6 +33,8 @@ This plugin follows the [standard WordPress installation method][]:
 
 == Screenshots ==
 
+1. Specify which Shibboleth headers map to user profile fields
+2. Assign users into WordPress roles based on arbitrary data provided by Shibboleth
 
 == Changelog ==
 
