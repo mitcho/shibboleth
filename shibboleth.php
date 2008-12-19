@@ -4,7 +4,7 @@
  Plugin URI: http://wordpress.org/extend/plugins/shibboleth
  Description: Easily externalize user authentication to a <a href="http://shibboleth.internet2.edu">Shibboleth</a> Service Provider
  Author: Will Norris
- Author URI: http://will.norris.name/
+ Author URI: http://willnorris.com/
  Version: 0.1
  License: Apache 2 (http://www.apache.org/licenses/LICENSE-2.0.html)
  */
@@ -58,8 +58,6 @@ function shibboleth_activate_plugin() {
 function shibboleth_wp_login() {
 	global $pagenow;
 	if ($pagenow != 'wp-login.php') return;
-
-	$shib_headers = get_option('shibboleth_headers');
 
 	switch ($_REQUEST['action']) {
 		case 'logout':
