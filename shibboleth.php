@@ -112,15 +112,15 @@ function shibboleth_login_url() {
 
 
 /**
- * Finish logging a user in based on the Shibboleth headers present.  
+ * Finish logging a user in based on the Shibboleth headers present.
  *
- * If the data available does not map to a WordPress role (based on the 
- * configured role-mapping), the user will not be allowed to login.  
+ * If the data available does not map to a WordPress role (based on the
+ * configured role-mapping), the user will not be allowed to login.
  *
- * If this is the first time we've seen this user (based on the username 
- * attribute), a new account will be created. 
+ * If this is the first time we've seen this user (based on the username
+ * attribute), a new account will be created.
  *
- * Known users will have their profile data updated based on the Shibboleth 
+ * Known users will have their profile data updated based on the Shibboleth
  * data present if the plugin is configured to do so.
  */
 function shibboleth_finish_login() {
@@ -197,8 +197,8 @@ function shibboleth_create_new_user($user_login) {
 
 
 /**
- * Get the role the current user should have.  This is determined by the role 
- * mapping configured for the plugin, and the Shibboleth headers present at the 
+ * Get the role the current user should have.  This is determined by the role
+ * mapping configured for the plugin, and the Shibboleth headers present at the
  * time of login.
  *
  * return string the role the current user should have
@@ -261,7 +261,7 @@ function shibboleth_login_form() {
 
 
 /**
- * For WordPress accounts that were created by Shibboleth, limit what profile 
+ * For WordPress accounts that were created by Shibboleth, limit what profile
  * attributes they can modify.
  */
 function shibboleth_profile_personal_options() {
@@ -384,9 +384,9 @@ function shibboleth_options_page() {
 
 			<h3>' . __('User Profile Data', 'shibboleth') . '</h3>
 
-			<p>Define the Shibboleth headers which should be mapped to each 
-			user profile attribute.  These header names are configured in 
-			<code>attribute-map.xml</code> (for Shibboleth 2.x) or 
+			<p>Define the Shibboleth headers which should be mapped to each
+			user profile attribute.  These header names are configured in
+			<code>attribute-map.xml</code> (for Shibboleth 2.x) or
 			<code>AAP.xml</code> (for Shibboleth 1.x).</p>
 
 			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5" width="100%">
@@ -414,7 +414,7 @@ function shibboleth_options_page() {
 					<th scope="row"><label for="update_users">' .  __('Update User Data') . '</label</th>
 					<td>
 						<input type="checkbox" id="update_users" name="update_users" '.(get_option('shibboleth_update_users') ? ' checked="checked"' : '').' />
-						<label for="update_users">Use Shibboleth data to update user profile data each time the user logs in.  This will prevent users from being 
+						<label for="update_users">Use Shibboleth data to update user profile data each time the user logs in.  This will prevent users from being
 						able to manually update these fields.</label>
 					  	<p>(Shibboleth data is always used to populate the user profile during account creation.)</p>
 
@@ -426,17 +426,17 @@ function shibboleth_options_page() {
 
 			<h3>' . __('User Role Mappings', 'shibboleth') . '</h3>
 
-			<p>Users can be placed into one of WordPress\'s internal roles 
-			based on any attribute.  For example, you could define a special 
-			eduPersonEntitlement value that designates the user as a WordPress 
-			Administrator.  Or you could automatically place all users with an 
+			<p>Users can be placed into one of WordPress\'s internal roles
+			based on any attribute.  For example, you could define a special
+			eduPersonEntitlement value that designates the user as a WordPress
+			Administrator.  Or you could automatically place all users with an
 			eduPersonAffiliation of "faculty" in the Author role.</p>
 
-			<p><strong>Current Limitations:</strong> While WordPress supports 
-			users having multiple roles, the Shibboleth plugin will only place 
-			the user in the highest ranking role.  Only a single header/value 
-			pair is supported for each user role.  This may be expanded in the 
-			future to support multiple header/value pairs or regular expression 
+			<p><strong>Current Limitations:</strong> While WordPress supports
+			users having multiple roles, the Shibboleth plugin will only place
+			the user in the highest ranking role.  Only a single header/value
+			pair is supported for each user role.  This may be expanded in the
+			future to support multiple header/value pairs or regular expression
 			values.</p>
 
 			<style type="text/css">
@@ -478,9 +478,9 @@ function shibboleth_options_page() {
 				<tr>
 					<th scope="row">Default Role</th>
 					<td>
-						<p>If a user does not map into any of the roles above, 
-						they will be placed into the default role.  If there is 
-						no default role, the user will not be able to 
+						<p>If a user does not map into any of the roles above,
+						they will be placed into the default role.  If there is
+						no default role, the user will not be able to
 						login with Shibboleth.</p>
 
 						<select id="default_role" name="shibboleth_roles[default]">
@@ -499,7 +499,7 @@ function shibboleth_options_page() {
 					<th scope="row">Update User Roles</th>
 					<td>
 						<input type="checkbox" id="update_roles" name="update_roles" '.(get_option('shibboleth_update_roles') ? ' checked="checked"' : '').' />
-						<label for="update_roles">Use Shibboleth data to update user role mappings each time the user logs in.  This 
+						<label for="update_roles">Use Shibboleth data to update user role mappings each time the user logs in.  This
 						will prevent you from setting user roles manually within WordPress.</label>
 					  	<p>(Shibboleth data is always used to populate the initial user role during account creation.)</p>
 					</td>
