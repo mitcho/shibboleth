@@ -9,6 +9,14 @@
  License: Apache 2 (http://www.apache.org/licenses/LICENSE-2.0.html)
  */
 
+define ( 'SHIBBOLETH_PLUGIN_REVISION', preg_replace( '/\$Rev: (.+) \$/', '\\1',
+	'$Rev$') ); // this needs to be on a separate line so that svn:keywords can work its magic
+
+
+// run activation function if new revision of plugin
+if (get_option('shibboleth_plugin_revision') === false || SHIBBOLETH_PLUGIN_REVISION != get_option('shibboleth_plugin_revision')) {
+	shibboleth_activate_plugin();
+}
 
 /**
  * Activate the plugin.  This registers default values for all of the 
