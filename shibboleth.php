@@ -9,24 +9,17 @@
  License: Apache 2 (http://www.apache.org/licenses/LICENSE-2.0.html)
  */
 
-register_activation_hook('shibboleth/shibboleth.php', 'shibboleth_activate_plugin');
-add_action('admin_menu', 'shibboleth_admin_panels');
-add_action('profile_personal_options', 'shibboleth_profile_personal_options');
-add_action('personal_options_update', 'shibboleth_personal_options_update');
-add_action('wp_logout', 'shibboleth_logout', 20);
-
-if (has_filter('authenticate')) {
-	add_filter('authenticate', 'shibboleth_authenticate', 10, 3);
-} else {
-	add_action('init', 'shibboleth_wp_login');
-}
 
 /**
- * Activate the plugin.
+ * Activate the plugin.  This registers default values for all of the 
+ * Shibboleth options and attempts to add the appropriate mod_rewrite rules to 
+ * WordPress's .htaccess file.
  */
 function shibboleth_activate_plugin() {
-	add_option('shibboleth_login_url', get_option('home') . '/Shibboleth.sso/Login');
-	add_option('shibboleth_logout_url', get_option('home') . '/Shibboleth.sso/Logout');
+	add_option('shibboleth_login_url', get_option('home') .  
+		'/Shibboleth.sso/Login');
+	add_option('shibboleth_logout_url', get_option('home') .  
+		'/Shibboleth.sso/Logout');
 
 	$headers = array(
 		'username' => 'eppn',
@@ -55,44 +48,20 @@ function shibboleth_activate_plugin() {
 
 	shibboleth_insert_htaccess();
 }
+register_activation_hook('shibboleth/shibboleth.php', 'shibboleth_activate_plugin');
+
+
+//TODO deactivation hook
 
 
 /**
- * Process requests to wp-login.php.
+ * Use the 'authenticate' filter if it is available (WordPress >= 2.8).
+ * Otherwise, hook into 'init'.
  */
-function shibboleth_wp_login() {
-	global $pagenow;
-	if ($pagenow != 'wp-login.php') return;
-
-	switch ($_REQUEST['action']) {
-		case 'local_login':
-			add_action('login_form', 'shibboleth_login_form');
-			break;
-
-		case 'login':
-		case '':
-			if (array_key_exists('wp-submit', $_POST)) break;
-
-			if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
-				shibboleth_finish_login();
-			} else {
-				shibboleth_start_login();
-			}
-			break;
-
-		default:
-			break;
-	}
-}
-
-
-/**
- * After logging out of WordPress, log user out of Shibboleth.
- */
-function shibboleth_logout() {
-	$logout_url = get_option('shibboleth_logout_url');
-	wp_redirect($logout_url);
-	exit;
+if (has_filter('authenticate')) {
+	add_filter('authenticate', 'shibboleth_authenticate', 10, 3);
+} else {
+	add_action('init', 'shibboleth_wp_login');
 }
 
 
@@ -112,7 +81,48 @@ function shibboleth_authenticate($user, $username, $password) {
 
 
 /**
- * Initiate Shibboleth Login.
+ * Process requests to wp-login.php.
+ */
+function shibboleth_wp_login() {
+	if ($GLOBALS['pagenow'] != 'wp-login.php') return;
+
+	switch ($GLOBALS['action']) {
+		case 'local_login':
+			add_action('login_form', 'shibboleth_login_form');
+			break;
+
+		case 'login':
+		case '':
+			if (array_key_exists('wp-submit', $_POST)) break;
+
+			if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
+				shibboleth_finish_login();
+			} else {
+				shibboleth_start_login();
+			}
+			break;
+
+		// TODO: redirect lostpassword action to institution password reset page
+
+		default:
+			break;
+	}
+}
+
+
+/**
+ * After logging out of WordPress, log user out of Shibboleth.
+ */
+function shibboleth_logout() {
+	$logout_url = get_option('shibboleth_logout_url');
+	wp_redirect($logout_url);
+	exit;
+}
+add_action('wp_logout', 'shibboleth_logout', 20);
+
+
+/**
+ * Initiate Shibboleth Login by redirecting user to the Shibboleth login URL.
  */
 function shibboleth_start_login() {
 	$login_url = shibboleth_login_url();
@@ -138,6 +148,20 @@ function shibboleth_login_url() {
 }
 
 
+/**
+ * Authenticate the user based on the current Shibboleth headers.
+ *
+ * If the data available does not map to a WordPress role (based on the
+ * configured role-mapping), the user will not be allowed to login.
+ *
+ * If this is the first time we've seen this user (based on the username
+ * attribute), a new account will be created.
+ *
+ * Known users will have their profile data updated based on the Shibboleth
+ * data present if the plugin is configured to do so.
+ *
+ * @return WP_User|WP_Error authenticated user or error if unable to authenticate
+ */
 function shibboleth_authenticate_user() {
 	$shib_headers = get_option('shibboleth_headers');
 
@@ -152,6 +176,7 @@ function shibboleth_authenticate_user() {
 
 	if ($user->ID) {
 		if (!get_usermeta($user->ID, 'shibboleth_account')) {
+			// TODO: what happens if non-shibboleth account by this name already exists?
 			//return new WP_Error('invalid_username', __('Account already exists by this name.'));
 		}
 	}
@@ -181,14 +206,9 @@ function shibboleth_authenticate_user() {
 /**
  * Finish logging a user in based on the Shibboleth headers present.
  *
- * If the data available does not map to a WordPress role (based on the
- * configured role-mapping), the user will not be allowed to login.
- *
- * If this is the first time we've seen this user (based on the username
- * attribute), a new account will be created.
- *
- * Known users will have their profile data updated based on the Shibboleth
- * data present if the plugin is configured to do so.
+ * This function is only used if the 'authenticate' filter is not present.  
+ * This filter was added in WordPress 2.8, and will take care of everything 
+ * shibboleth_finish_login is doing.
  */
 function shibboleth_finish_login() {
 	$user = shibboleth_authenticate_user();
@@ -310,6 +330,7 @@ function shibboleth_profile_personal_options() {
 	$user = wp_get_current_user();
 	if (get_usermeta($user->ID, 'shibboleth_account')) {
 		add_filter('show_password_fields', create_function('$v', 'return false;'));
+		// TODO: add link to institution's password change page
 
 		if (get_option('shibboleth_update_users')) {
 			echo '
@@ -324,39 +345,31 @@ function shibboleth_profile_personal_options() {
 	}
 }
 
+
 /**
- * Ensure profile data isn't updated by the user
+ * Ensure profile data isn't updated by the user.  This only applies to 
+ * accounts that were provisioned through Shibboleth, and only if the option
+ * to manage user attributes exclusively from Shibboleth is enabled.
  */
 function shibboleth_personal_options_update() {
 	$user = wp_get_current_user();
-	if (get_usermeta($user->ID, 'shibboleth_account') && get_option('shibboleth_update_users')) {
-		add_filter('pre_user_first_name', 'shibboleth_pre_first_name');
-		add_filter('pre_user_last_name', 'shibboleth_pre_last_name');
-		add_filter('pre_user_nickname', 'shibboleth_pre_nickname');
-		add_filter('pre_user_display_name', 'shibboleth_pre_display_name');
-		add_filter('pre_user_email', 'shibboleth_pre_email');
-	}
-}
 
-function shibboleth_pre_first_name($name) {
-	global $current_user;
-	return $current_user->first_name;
-}
-function shibboleth_pre_last_name($name) {
-	global $current_user;
-	return $current_user->last_name;
-}
-function shibboleth_pre_nickname($name) {
-	global $current_user;
-	return $current_user->nickname;
-}
-function shibboleth_pre_display_name($name) {
-	global $current_user;
-	return $current_user->display_name;
-}
-function shibboleth_pre_email($email) {
-	global $current_user;
-	return $current_user->user_email;
+	if (get_usermeta($user->ID, 'shibboleth_account') && get_option('shibboleth_update_users')) {
+		add_filter('pre_user_first_name', 
+			create_function('$n', 'return $GLOBALS["current_user"]->first_name;'));
+
+		add_filter('pre_user_last_name', 
+			create_function('$n', 'return $GLOBALS["current_user"]->last_name;'));
+
+		add_filter('pre_user_nickname', 
+			create_function('$n', 'return $GLOBALS["current_user"]->nickname;'));
+
+		add_filter('pre_user_display_name', 
+			create_function('$n', 'return $GLOBALS["current_user"]->display_name;'));
+
+		add_filter('pre_user_email', 
+			create_function('$e', 'return $GLOBALS["current_user"]->user_email;'));
+	}
 }
 
 
@@ -368,7 +381,11 @@ function shibboleth_pre_email($email) {
 function shibboleth_admin_panels() {
 	// global options page
 	$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), __('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
+
+	add_action('profile_personal_options', 'shibboleth_profile_personal_options');
+	add_action('personal_options_update', 'shibboleth_personal_options_update');
 }
+add_action('admin_menu', 'shibboleth_admin_panels');
 
 
 /**
@@ -563,7 +580,7 @@ function shibboleth_options_page() {
 
 
 /**
- * Insert Shibboleth directives into .htaccess file.
+ * Insert directives into .htaccess file to enable Shibboleth Lazy Sessions.
  */
 function shibboleth_insert_htaccess() {
 	if (got_mod_rewrite()) {
@@ -571,7 +588,6 @@ function shibboleth_insert_htaccess() {
 		$rules = array('AuthType Shibboleth', 'Require Shibboleth');
 		insert_with_markers($htaccess, 'Shibboleth', $rules);
 	}
-
 }
 
 ?>
