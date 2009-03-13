@@ -401,30 +401,32 @@ function shibboleth_options_page() {
 
 	screen_icon('shibboleth');
 
-	echo '
+?>
 	<style type="text/css">
-		#icon-shibboleth { background: url("' . plugins_url('shibboleth/icon.png') . '") no-repeat; height: 36px width: 36px; }
+		#icon-shibboleth { background: url("<?php echo plugins_url('shibboleth/icon.png') ?>") no-repeat; height: 36px width: 36px; }
 	</style>
 
 	<div class="wrap">
 		<form method="post">
 
-			<h2>' . __('Shibboleth Options', 'shibboleth') . '</h2>
+			<h2><?php _e('Shibboleth Options', 'shibboleth') ?></h2>
 
 			<table class="form-table">
 				<tr valign="top">
-					<th scope="row"><label for="login_url">' .  __('Session Initiator URL') . '</label</th>
-					<td><input type="text" id="login_url" name="login_url" value="' . get_option('shibboleth_login_url') . '" size="50" /></td>
+					<th scope="row"><label for="login_url"><?php _e('Session Initiator URL') ?></label</th>
+					<td>
+						<input type="text" id="login_url" name="login_url" value="<?php echo get_option('shibboleth_login_url') ?>" size="50" />
+					</td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="logout_url">' .  __('Logout URL') . '</label</th>
-					<td><input type="text" id="logout_url" name="logout_url" value="' . get_option('shibboleth_logout_url') . '" size="50" /></td>
+					<th scope="row"><label for="logout_url"><?php _e('Logout URL') ?></label</th>
+					<td><input type="text" id="logout_url" name="logout_url" value="<?php echo get_option('shibboleth_logout_url') ?>" size="50" /></td>
 				</tr>
 			</table>
 
 			<br class="clear" />
 
-			<h3>' . __('User Profile Data', 'shibboleth') . '</h3>
+			<h3><?php _e('User Profile Data', 'shibboleth') ?></h3>
 
 			<p>Define the Shibboleth headers which should be mapped to each
 			user profile attribute.  These header names are configured in
@@ -433,29 +435,29 @@ function shibboleth_options_page() {
 
 			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5" width="100%">
 				<tr valign="top">
-					<th scope="row"><label for="username">' .  __('Username') . '</label</th>
-					<td><input type="text" id="username" name="headers[username]" value="'.$shib_headers['username'].'" /></td>
+					<th scope="row"><label for="username"><?php _e('Username') ?></label</th>
+					<td><input type="text" id="username" name="headers[username]" value="<?php echo $shib_headers['username'] ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="first_name">' . __('First name') . '</label</th>
-					<td><input type="text" id="first_name" name="headers[first_name]" value="'.$shib_headers['first_name'].'" /></td>
+					<th scope="row"><label for="first_name"><?php _e('First name') ?></label</th>
+					<td><input type="text" id="first_name" name="headers[first_name]" value="<?php echo $shib_headers['first_name'] ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="last_name">' . __('Last name') . '</label</th>
-					<td><input type="text" id="last_name" name="headers[last_name]" value="'.$shib_headers['last_name'].'" /></td>
+					<th scope="row"><label for="last_name"><?php _e('Last name') ?></label</th>
+					<td><input type="text" id="last_name" name="headers[last_name]" value="<?php echo $shib_headers['last_name'] ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="display_name">' . __('Display name') . '</label</th>
-					<td><input type="text" id="display_name" name="headers[display_name]" value="'.$shib_headers['display_name'].'" /></td>
+					<th scope="row"><label for="display_name"><?php _e('Display name') ?></label</th>
+					<td><input type="text" id="display_name" name="headers[display_name]" value="<?php echo $shib_headers['display_name'] ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="email">' . __('Email Address') . '</label</th>
-					<td><input type="text" id="email" name="headers[email]" value="'.$shib_headers['email'].'" /></td>
+					<th scope="row"><label for="email"><?php _e('Email Address') ?></label</th>
+					<td><input type="text" id="email" name="headers[email]" value="<?php echo $shib_headers['email'] ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="update_users">' .  __('Update User Data') . '</label</th>
+					<th scope="row"><label for="update_users"><?php _e('Update User Data') ?></label</th>
 					<td>
-						<input type="checkbox" id="update_users" name="update_users" '.(get_option('shibboleth_update_users') ? ' checked="checked"' : '').' />
+						<input type="checkbox" id="update_users" name="update_users" <?php echo get_option('shibboleth_update_users') ? ' checked="checked"' : '' ?> />
 						<label for="update_users">Use Shibboleth data to update user profile data each time the user logs in.  This will prevent users from being
 						able to manually update these fields.</label>
 					  	<p>(Shibboleth data is always used to populate the user profile during account creation.)</p>
@@ -466,9 +468,9 @@ function shibboleth_options_page() {
 
 			<br class="clear" />
 
-			<h3>' . __('User Role Mappings', 'shibboleth') . '</h3>
+			<h3><?php _e('User Role Mappings', 'shibboleth') ?></h3>
 
-			<p>Users can be placed into one of WordPress\'s internal roles
+			<p>Users can be placed into one of WordPress's internal roles
 			based on any attribute.  For example, you could define a special
 			eduPersonEntitlement value that designates the user as a WordPress
 			Administrator.  Or you could automatically place all users with an
@@ -500,7 +502,8 @@ function shibboleth_options_page() {
 								<th scope="column">Header Value</th>
 							</tr>
 						</thead>
-						<tbody>';
+						<tbody>
+<?php
 
 					foreach ($wp_roles->role_names as $key => $name) {
 						echo'
@@ -510,8 +513,8 @@ function shibboleth_options_page() {
 							<td><input type="text" id="role_'.$key.'_value" name="shibboleth_roles['.$key.'][value]" value="' . @$shib_roles[$key]['value'] . '" /></td>
 						</tr>';
 					}
+?>
 
-					echo '
 						</tbody>
 						</table>
 					</td>
@@ -528,19 +531,20 @@ function shibboleth_options_page() {
 						<select id="default_role" name="shibboleth_roles[default]">
 						<option value="">(none)</option>';
 
+<?php
 			foreach ($wp_roles->role_names as $key => $name) {
 				echo '
 						<option value="'.$key.'"'. ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>'.$name.'</option>';
 			}
+?>
 
-			echo'
 					</select></td>
 				</tr>
 
 				<tr>
 					<th scope="row">Update User Roles</th>
 					<td>
-						<input type="checkbox" id="update_roles" name="update_roles" '.(get_option('shibboleth_update_roles') ? ' checked="checked"' : '').' />
+						<input type="checkbox" id="update_roles" name="update_roles" <?php echo get_option('shibboleth_update_roles') ? ' checked="checked"' : '' ?> />
 						<label for="update_roles">Use Shibboleth data to update user role mappings each time the user logs in.  This
 						will prevent you from setting user roles manually within WordPress.</label>
 					  	<p>(Shibboleth data is always used to populate the initial user role during account creation.)</p>
@@ -549,12 +553,12 @@ function shibboleth_options_page() {
 			</table>
 
 
-			' . wp_nonce_field('shibboleth_update_options', '_wpnonce', true, false) . '
-			<p class="submit"><input type="submit" name="submit" value="' . __('Update Options') . ' &raquo;" /></p>
+			<?php wp_nonce_field('shibboleth_update_options') ?>
+			<p class="submit"><input type="submit" name="submit" value="<?php _e('Update Options') ?>" /></p>
 		</form>
 	</div>
-';
 
+<?php
 }
 
 
