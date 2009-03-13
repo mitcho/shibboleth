@@ -10,11 +10,16 @@
  */
 
 register_activation_hook('shibboleth/shibboleth.php', 'shibboleth_activate_plugin');
-add_action('init', 'shibboleth_wp_login');
 add_action('admin_menu', 'shibboleth_admin_panels');
 add_action('profile_personal_options', 'shibboleth_profile_personal_options');
 add_action('personal_options_update', 'shibboleth_personal_options_update');
+add_action('wp_logout', 'shibboleth_logout', 20);
 
+if (has_filter('authenticate')) {
+	add_filter('authenticate', 'shibboleth_authenticate', 10, 3);
+} else {
+	add_action('init', 'shibboleth_wp_login');
+}
 
 /**
  * Activate the plugin.
@@ -60,26 +65,48 @@ function shibboleth_wp_login() {
 	if ($pagenow != 'wp-login.php') return;
 
 	switch ($_REQUEST['action']) {
-		case 'logout':
-			wp_logout();
-
-			$logout_url = get_option('shibboleth_logout_url');
-			wp_redirect($logout_url);
-			exit;
-
-			break;
-
 		case 'local_login':
 			add_action('login_form', 'shibboleth_login_form');
 			break;
 
-		default:
-			if ($_SERVER['Shib-Session-ID']) {
+		case 'login':
+		case '':
+			if (array_key_exists('wp-submit', $_POST)) break;
+
+			if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
 				shibboleth_finish_login();
 			} else {
 				shibboleth_start_login();
 			}
 			break;
+
+		default:
+			break;
+	}
+}
+
+
+/**
+ * After logging out of WordPress, log user out of Shibboleth.
+ */
+function shibboleth_logout() {
+	$logout_url = get_option('shibboleth_logout_url');
+	wp_redirect($logout_url);
+	exit;
+}
+
+
+/**
+ * Authenticate the user.
+ */
+function shibboleth_authenticate($user, $username, $password) {
+	global $action;
+	if ($action == 'local_login' || array_key_exists('loggedout', $_REQUEST) || array_key_exists('wp-submit', $_POST)) return $user;
+
+	if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
+		return shibboleth_authenticate_user();
+	} else {
+		shibboleth_start_login();
 	}
 }
 
@@ -111,6 +138,46 @@ function shibboleth_login_url() {
 }
 
 
+function shibboleth_authenticate_user() {
+	$shib_headers = get_option('shibboleth_headers');
+
+	// ensure user is authorized to login
+	$user_role = shibboleth_get_user_role();
+	if (empty($user_role)) {
+		return new WP_Error('no_access', __('You do not have sufficient access.'));
+	}
+
+	$username = $_SERVER[$shib_headers['username']];
+	$user = new WP_User($username);
+
+	if ($user->ID) {
+		if (!get_usermeta($user->ID, 'shibboleth_account')) {
+			//return new WP_Error('invalid_username', __('Account already exists by this name.'));
+		}
+	}
+
+	// create account if new user
+	if (!$user->ID) {
+		$user = shibboleth_create_new_user($username);
+	}
+
+	if (!$user->ID) {
+		$error_message = 'Unable to create account based on data provided.';
+		if (defined('WP_DEBUG') && WP_DEBUG) {
+			$error_message .= '<!-- ' . print_r($_SERVER, true) . ' -->';
+		}
+		return new WP_Error('missing_data', $error_message);
+	}
+
+	// update user data
+	update_usermeta($user->ID, 'shibboleth_account', true);
+	if (get_option('shibboleth_update_users')) shibboleth_update_user_data($user->ID);
+	if (get_option('shibboleth_update_roles')) $user->set_role($user_role);
+
+	return $user;
+}
+
+
 /**
  * Finish logging a user in based on the Shibboleth headers present.
  *
@@ -124,36 +191,11 @@ function shibboleth_login_url() {
  * data present if the plugin is configured to do so.
  */
 function shibboleth_finish_login() {
-	$shib_headers = get_option('shibboleth_headers');
+	$user = shibboleth_authenticate_user();
 
-	// ensure user is authorized to login
-	$user_role = shibboleth_get_user_role();
-	if (empty($user_role)) {
-		wp_die('you do not have sufficient access.');
+	if (is_wp_error($user)) {
+		wp_die($user->get_error_message());
 	}
-
-	$username = $_SERVER[$shib_headers['username']];
-	$user = new WP_User($username);
-
-	if ($user->ID) {
-		if (!get_usermeta($user->ID, 'shibboleth_account')) {
-			//wp_die('account already exists by this name');
-		}
-	}
-
-	// create account if new user
-	if (!$user->ID) {
-		$user = shibboleth_create_new_user($username);
-	}
-
-	if (!$user->ID) {
-		wp_die('unable to create account based on data provided');
-	}
-
-	// update user data
-	update_usermeta($user->ID, 'shibboleth_account', true);
-	if (get_option('shibboleth_update_users')) shibboleth_update_user_data($user->ID);
-	if (get_option('shibboleth_update_roles')) $user->set_role($user_role);
 
 	// log user in
 	set_current_user($user->ID);
@@ -357,11 +399,11 @@ function shibboleth_options_page() {
 	$shib_headers = get_option('shibboleth_headers');
 	$shib_roles = get_option('shibboleth_roles');
 
+	screen_icon('shibboleth');
+
 	echo '
 	<style type="text/css">
-		.form-table input[type="text"] {
-			width: 300px;
-		}
+		#icon-shibboleth { background: url("' . plugins_url('shibboleth/icon.png') . '") no-repeat; height: 36px width: 36px; }
 	</style>
 
 	<div class="wrap">
@@ -372,11 +414,11 @@ function shibboleth_options_page() {
 			<table class="form-table">
 				<tr valign="top">
 					<th scope="row"><label for="login_url">' .  __('Session Initiator URL') . '</label</th>
-					<td><input type="text" id="login_url" name="login_url" value="' . get_option('shibboleth_login_url') . '" /></td>
+					<td><input type="text" id="login_url" name="login_url" value="' . get_option('shibboleth_login_url') . '" size="50" /></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="logout_url">' .  __('Logout URL') . '</label</th>
-					<td><input type="text" id="logout_url" name="logout_url" value="' . get_option('shibboleth_logout_url') . '" /></td>
+					<td><input type="text" id="logout_url" name="logout_url" value="' . get_option('shibboleth_logout_url') . '" size="50" /></td>
 				</tr>
 			</table>
 
