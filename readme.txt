@@ -55,6 +55,9 @@ Shibboleth settings page.
 
 == Changelog ==
 
-= version X =
+= version 0.8 =
+ - lots of fixes for WordPress MU
+
+= version 0.1 =
  - initial public release
 
