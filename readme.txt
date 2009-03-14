@@ -3,7 +3,7 @@ Contributors: wnorris
 Tags: shibboleth, authentication, login, saml
 Requires at least: 2.6
 Tested up to: 2.7.1
-Stable tag: 0.8
+Stable tag: 1.0
 
 Allows WordPress to externalize user authentication and account creation to a
 Shibboleth Service Provider.
@@ -85,8 +85,9 @@ mechanisms to get back into your site.
 
 == Changelog ==
 
-= version 0.8 =
+= version 1.0 =
  - now works properly with WordPress MU
+ - move Shibboleth menu to Site Admin for WordPress MU (props: Chris Bland)
  - lots of code cleanup and documentation
 
 = version 0.1 =
