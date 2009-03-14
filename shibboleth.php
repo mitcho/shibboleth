@@ -34,6 +34,7 @@ function shibboleth_activate_plugin() {
 		'username' => 'eppn',
 		'first_name' => 'givenName',
 		'last_name' => 'sn',
+		'nickname' => 'eppn',
 		'display_name' => 'displayName',
 		'email' => 'mail',
 	);
@@ -152,6 +153,7 @@ function shibboleth_start_login() {
  * Generate the URL to initiate Shibboleth login.
  *
  * @return the URL to direct the user to in order to initiate Shibboleth login
+ * @uses apply_filters() Calls 'shibboleth_login_url' before returning Shibboleth login URL
  */
 function shibboleth_login_url() {
 
@@ -236,6 +238,8 @@ function shibboleth_authenticate_user() {
  * This function is only used if the 'authenticate' filter is not present.  
  * This filter was added in WordPress 2.8, and will take care of everything 
  * shibboleth_finish_login is doing.
+ *
+ * @uses apply_filters() Calls 'login_redirect' before redirecting the user
  */
 function shibboleth_finish_login() {
 	$user = shibboleth_authenticate_user();
@@ -290,13 +294,15 @@ function shibboleth_create_new_user($user_login) {
  * mapping configured for the plugin, and the Shibboleth headers present at the
  * time of login.
  *
- * return string the role the current user should have
+ * @return string the role the current user should have
+ * @uses apply_filters() Calls 'shibboleth_roles' after retrieving shibboleth_roles array
+ * @uses apply_filters() Calls 'shibboleth_user_role' before returning final user role
  */
 function shibboleth_get_user_role() {
 	global $wp_roles;
 	if (!$wp_roles) $wp_roles = new WP_Roles();
 
-	$shib_roles = shibboleth_get_option('shibboleth_roles');
+	$shib_roles = apply_filters('shibboleth_roles', shibboleth_get_option('shibboleth_roles'));
 	$user_role = $shib_roles['default'];
 
 	foreach ($wp_roles->role_names as $key => $name) {
@@ -312,6 +318,8 @@ function shibboleth_get_user_role() {
 		}
 	}
 
+	$user_role = apply_filters('shibboleth_user_role', $user_role);
+
 	return $user_role;
 }
 
@@ -320,6 +328,9 @@ function shibboleth_get_user_role() {
  * Update the user data for the specified user based on the current Shibboleth headers.
  *
  * @param int $user_id ID of the user to update
+ * @uses apply_filters() Calls 'shibboleth_user_*' before setting user attributes, 
+ *       where '*' is one of: login, nicename, first_name, last_name, nickname, 
+ *       display_name, email
  */
 function shibboleth_update_user_data($user_id) {
 	require_once( ABSPATH . WPINC . '/registration.php');
@@ -328,12 +339,13 @@ function shibboleth_update_user_data($user_id) {
 
 	$user_data = array(
 		'ID' => $user_id,
-		'user_login' => $_SERVER[$shib_headers['username']],
-		'user_nicename' => $_SERVER[$shib_headers['username']],
-		'first_name' => $_SERVER[$shib_headers['first_name']],
-		'last_name' => $_SERVER[$shib_headers['last_name']],
-		'display_name' => $_SERVER[$shib_headers['display_name']],
-		'user_email' => $_SERVER[$shib_headers['email']],
+		'user_login' => apply_filters('shibboleth_user_login', $_SERVER[$shib_headers['username']]),
+		'user_nicename' => apply_filters('shibboleth_user_nicename', $_SERVER[$shib_headers['username']]),
+		'first_name' => apply_filters('shibboleth_user_first_name', $_SERVER[$shib_headers['first_name']]),
+		'last_name' => apply_filters('shibboleth_user_last_name', $_SERVER[$shib_headers['last_name']]),
+		'nickname' => apply_filters('shibboleth_user_nickname', $_SERVER[$shib_headers['nickname']]),
+		'display_name' => apply_filters('shibboleth_user_display_name', $_SERVER[$shib_headers['display_name']]),
+		'user_email' => apply_filters('shibboleth_user_email', $_SERVER[$shib_headers['email']]),
 	);
 
 	wp_update_user($user_data);
@@ -341,11 +353,13 @@ function shibboleth_update_user_data($user_id) {
 
 
 /**
- * Add a "Login with Shibboleth" link to the WordPress login form.
+ * Add a "Login with Shibboleth" link to the WordPress login form.  This link 
+ * will be wrapped in a <p> with an id value of "shibboleth_login" so that 
+ * users can style this however they choose.
  */
 function shibboleth_login_form() {
 	$login_url = shibboleth_login_url();
-	echo '<p><a href="' . $login_url . '">Login with Shibboleth</a></p>';
+	echo '<p id="shibboleth_login"><a href="' . $login_url . '">Login with Shibboleth</a></p>';
 }
 
 
@@ -422,6 +436,8 @@ add_action('admin_menu', 'shibboleth_admin_panels');
 
 /**
  * WordPress options page to configure the Shibboleth plugin.
+ *
+ * @uses apply_filters() Calls 'shibboleth_plugin_path'
  */
 function shibboleth_options_page() {
 	global $wp_roles;
@@ -496,6 +512,10 @@ function shibboleth_options_page() {
 				<tr valign="top">
 					<th scope="row"><label for="last_name"><?php _e('Last name') ?></label</th>
 					<td><input type="text" id="last_name" name="headers[last_name]" value="<?php echo $shib_headers['last_name'] ?>" /></td>
+				</tr>
+				<tr valign="top">
+					<th scope="row"><label for="nickname"><?php _e('Nickname') ?></label</th>
+					<td><input type="text" id="nickname" name="headers[nickname]" value="<?php echo $shib_headers['nickname'] ?>" /></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="display_name"><?php _e('Display name') ?></label</th>
