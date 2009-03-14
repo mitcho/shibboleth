@@ -4,13 +4,13 @@ Tags: shibboleth, authentication, login, saml
 Tested up to: 2.6.3
 Stable tag: 0.1
 
-Allows WordPress to externalize user authentication and account creation to a [Shibboleth][] Service Provider.
-
-[Shibboleth]: http://shibboleth.internet2.edu/
+Allows WordPress to externalize user authentication and account creation to a
+Shibboleth Service Provider.
 
 == Description ==
 
-Allows WordPress to externalize user authentication and account creation to a [Shibboleth][] Service Provider.
+Allows WordPress to externalize user authentication and account creation to a
+[Shibboleth][] Service Provider.
 
 [Shibboleth]: http://shibboleth.internet2.edu/
 
@@ -27,9 +27,18 @@ If it is unable to do so, you can add this manually:
     AuthType Shibboleth
     Require Shibboleth
 
-Upload this plugin to your WordPress plugins folder (probably
+** For single-user WordPress **
+
+Upload the `shibboleth` folder to your WordPress plugins folder (probably
 /wp-content/plugins), and activate it through the WordPress admin panel.
-Configure it from the Options page.
+Configure it from the Shibboleth settings page.
+
+** For WordPress MU **
+
+Shibboleth works equally well with WordPress MU using either vhosts or folders
+for blogs.  Upload the `shibboleth` folder to your mu-plugins folder (probably
+/wp-content/mu-plugins).  No need to activate it, just configure it from the
+Shibboleth settings page.
 
 [properly installed]: https://spaces.internet2.edu/display/SHIB2/Installation
 
