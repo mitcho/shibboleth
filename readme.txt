@@ -27,13 +27,13 @@ If it is unable to do so, you can add this manually:
     AuthType Shibboleth
     Require Shibboleth
 
-** For single-user WordPress **
+**For single-user WordPress**
 
 Upload the `shibboleth` folder to your WordPress plugins folder (probably
 /wp-content/plugins), and activate it through the WordPress admin panel.
 Configure it from the Shibboleth settings page.
 
-** For WordPress MU **
+**For WordPress MU**
 
 Shibboleth works equally well with WordPress MU using either vhosts or folders
 for blogs.  Upload the `shibboleth` folder to your mu-plugins folder (probably
