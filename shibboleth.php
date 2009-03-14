@@ -395,10 +395,50 @@ function shibboleth_profile_personal_options() {
 		if (shibboleth_get_option('shibboleth_update_users')) {
 			echo '
 			<script type="text/javascript">
-				var cannot_change = " This field cannot be changed from WordPress.";
 				jQuery(function() {
-					jQuery("#first_name,#last_name,#nickname,#display_name,#email")
-						.attr("disabled", true).after(cannot_change);
+					jQuery("#first_name,#last_name,#nickname,#display_name,#email").attr("disabled", true);
+					jQuery("h3:contains(\'Name\')").after("<div class=\"updated fade\"><p>' 
+						. __('These fields cannot be changed from WordPress.', 'shibboleth') . '<p></div>");
+				});
+			</script>';
+		}
+	}
+}
+
+
+/**
+ * For WordPress accounts that were created by Shibboleth, warn the admin of 
+ * Shibboleth managed attributes.
+ */
+function shibboleth_edit_user_profile() {
+	global $user_id;
+
+	if (get_usermeta($user_id, 'shibboleth_account')) {
+		$shibboleth_fields = array();
+
+		if (shibboleth_get_option('shibboleth_update_users')) {
+			$shibboleth_fields = array_merge($shibboleth_fields, 
+				array('user_login', 'first_name', 'last_name', 'nickname', 'display_name', 'email'));
+		}
+
+		if (shibboleth_get_option('shibboleth_update_roles')) {
+			$shibboleth_fields = array_merge($shibboleth_fields, array('role'));
+		}
+
+		if (!empty($shibboleth_fields)) {
+			$selectors = array();
+
+			foreach($shibboleth_fields as $field) {
+				$selectors[] = 'label[for=\'' . $field . '\']';
+			}
+
+			echo '
+			<script type="text/javascript">
+				jQuery(function() {
+					jQuery("' . implode(',', $selectors) . '").before("<span style=\"color: #F00; font-weight: bold;\">*</span> ");
+					jQuery("h3:contains(\'Name\')")
+						.after("<div class=\"updated fade\"><p><span style=\"color: #F00; font-weight: bold;\">*</span> ' 
+							. __('Starred fields are managed by Shibboleth and should not be changed from WordPress.', 'shibboleth') . '</p></div>");
 				});
 			</script>';
 		}
@@ -471,6 +511,7 @@ function shibboleth_admin_panels() {
 	add_action('profile_personal_options', 'shibboleth_profile_personal_options');
 	add_action('personal_options_update', 'shibboleth_personal_options_update');
 	add_action('show_user_profile', 'shibboleth_show_user_profile');
+	add_action('edit_user_profile', 'shibboleth_edit_user_profile');
 }
 add_action('admin_menu', 'shibboleth_admin_panels');
 
