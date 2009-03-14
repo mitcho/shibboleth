@@ -43,13 +43,12 @@ If it is unable to do so, you can add this manually:
     AuthType Shibboleth
     Require Shibboleth
 
-  
-**For single-user WordPress**  
+= For single-user WordPress =
 Upload the `shibboleth` folder to your WordPress plugins folder (probably
 /wp-content/plugins), and activate it through the WordPress admin panel.
 Configure it from the Shibboleth settings page.
 
-**For WordPress MU**  
+= For WordPress MU =
 Shibboleth works equally well with WordPress MU using either vhosts or folders
 for blogs.  Upload the `shibboleth` folder to your mu-plugins folder (probably
 /wp-content/mu-plugins).  No need to activate it, just configure it from the
@@ -62,6 +61,18 @@ Shibboleth settings page.
 = What is Shibboleth? =
 
 <http://shibboleth.internet2.edu/>
+
+= Can I still login using my local 'admin' account? =
+
+Yes. Simply specify the login action `local_login`, like so:
+
+	navigate to http://yoursite.com/wp-login.php?action=local_login
+
+= I've screwed something up and can't get into my WordPress site at all =
+
+You can forcibly disable the plugin by deleting or renaming the plugin folder.
+This should allow you to then use the normal WordPress account recovery
+mechanisms to get back into your site.
 
 == Screenshots ==
 
