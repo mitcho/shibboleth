@@ -10,8 +10,23 @@ Shibboleth Service Provider.
 
 == Description ==
 
-Allows WordPress to externalize user authentication and account creation to a
-[Shibboleth][] Service Provider.
+This plugin is designed to support integrating your WordPress or WordPress MU
+blog into your existing identity management infrastructure using a
+[Shibboleth][] Service Provider.  
+
+All WordPress login requests will be sent to your configured Shibboleth
+Identity Provider or Discovery Service.  Upon successful authentication, a new
+WordPress account will be automatically provisioned for the user if one does
+not already exist.  User attributes (username, first name, last name, display
+name, and email address) can be synchronized with your enterprise's system of
+record each time the user logs into WordPress.  
+
+Finally, the user's role within WordPress can be automatically set (and
+continually updated) based on any attribute Shibboleth provides.  For example,
+you may decide to give users with an eduPersonAffiliation value of 'faculty'
+the WordPress role of 'editor', while the eduPersonAffiliation value of
+'student' maps to the WordPress role 'contributor'.  Or you may choose to limit
+access to WordPress altogether using a special eduPersonEntitlement value.
 
 [Shibboleth]: http://shibboleth.internet2.edu/
 
@@ -28,14 +43,13 @@ If it is unable to do so, you can add this manually:
     AuthType Shibboleth
     Require Shibboleth
 
-**For single-user WordPress**
-
+  
+**For single-user WordPress**  
 Upload the `shibboleth` folder to your WordPress plugins folder (probably
 /wp-content/plugins), and activate it through the WordPress admin panel.
 Configure it from the Shibboleth settings page.
 
-**For WordPress MU**
-
+**For WordPress MU**  
 Shibboleth works equally well with WordPress MU using either vhosts or folders
 for blogs.  Upload the `shibboleth` folder to your mu-plugins folder (probably
 /wp-content/mu-plugins).  No need to activate it, just configure it from the
@@ -57,7 +71,8 @@ Shibboleth settings page.
 == Changelog ==
 
 = version 0.8 =
- - lots of fixes for WordPress MU
+ - now works properly with WordPress MU
+ - lots of code cleanup and documentation
 
 = version 0.1 =
  - initial public release
