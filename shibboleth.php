@@ -106,6 +106,7 @@ function shibboleth_authenticate($user, $username, $password) {
 function shibboleth_wp_login() {
 	if ($GLOBALS['pagenow'] != 'wp-login.php') return;
 
+
 	switch ($_REQUEST['action']) {
 		case 'local_login':
 			add_action('login_form', 'shibboleth_login_form');
@@ -113,6 +114,7 @@ function shibboleth_wp_login() {
 
 		case 'login':
 		case '':
+			if (array_key_exists('checkemail', $_REQUEST)) return;
 			if (array_key_exists('wp-submit', $_POST)) break;
 
 			if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
@@ -125,7 +127,19 @@ function shibboleth_wp_login() {
 		case 'logout':
 			break;
 
-		// TODO: redirect lostpassword action to institution password reset page
+		case 'lostpassword':
+			if (shibboleth_get_option('shibboleth_password_reset_url')) {
+				if (array_key_exists('user_login', $_REQUEST)) {
+					$user = get_userdatabylogin($_REQUEST['user_login']);
+					if (!$user) $user = get_user_by_email($_REQUEST['user_login']);
+
+					if ($user && get_usermeta($user->ID, 'shibboleth_account')) {
+						wp_redirect(shibboleth_get_option('shibboleth_password_reset_url'));
+						exit;
+					}
+				}
+			}
+			break;
 
 		default:
 			break;
@@ -398,12 +412,12 @@ function shibboleth_profile_personal_options() {
 function shibboleth_show_user_profile() {
 	$user = wp_get_current_user();
 	if (get_usermeta($user->ID, 'shibboleth_account')) {
-		if (shibboleth_get_option('shibboleth_change_password_url')) {
+		if (shibboleth_get_option('shibboleth_password_change_url')) {
 ?>
 	<table class="form-table">
 		<tr>
 			<th>Change Password</th>
-			<td><a href="<?php echo shibboleth_get_option('shibboleth_change_password_url'); 
+			<td><a href="<?php echo shibboleth_get_option('shibboleth_password_change_url'); 
 				?>" target="_blank"><?php _e('Change your password', 'shibboleth'); ?></a></td>
 		</tr>
 	</table>
@@ -484,7 +498,8 @@ function shibboleth_options_page() {
 
 		shibboleth_update_option('shibboleth_login_url', $_POST['login_url']);
 		shibboleth_update_option('shibboleth_logout_url', $_POST['logout_url']);
-		shibboleth_update_option('shibboleth_change_password_url', $_POST['change_password_url']);
+		shibboleth_update_option('shibboleth_password_change_url', $_POST['password_change_url']);
+		shibboleth_update_option('shibboleth_password_reset_url', $_POST['password_reset_url']);
 		shibboleth_update_option('shibboleth_update_users', $_POST['update_users']);
 		shibboleth_update_option('shibboleth_update_roles', $_POST['update_roles']);
 	}
@@ -518,10 +533,17 @@ function shibboleth_options_page() {
 					<td><input type="text" id="logout_url" name="logout_url" value="<?php echo shibboleth_get_option('shibboleth_logout_url') ?>" size="50" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="change_password_url"><?php _e('Change Password URL') ?></label</th>
+					<th scope="row"><label for="password_change_url"><?php _e('Password Change URL') ?></label</th>
 					<td>
-						<input type="text" id="change_password_url" name="change_password_url" value="<?php echo shibboleth_get_option('shibboleth_change_password_url') ?>" size="50" />
-						<span class="setting-description">If this option is set, users will be directed to this URL in order to change their password.</span>
+						<input type="text" id="password_change_url" name="password_change_url" value="<?php echo shibboleth_get_option('shibboleth_password_change_url') ?>" size="50" />
+						<div class="setting-description"><?php _e('If this option is set, Shibboleth users will be instructed to use this URL in order to change their password.', 'shibboleth') ?></div>
+					</td>
+				</tr>
+				<tr valign="top">
+					<th scope="row"><label for="password_reset_url"><?php _e('Password Reset URL') ?></label</th>
+					<td>
+						<input type="text" id="password_reset_url" name="password_reset_url" value="<?php echo shibboleth_get_option('shibboleth_password_reset_url') ?>" size="50" />
+						<div class="setting-description"><?php _e('If this option is set, Shibboleth users who try to reset their forgotten password using WordPress will be redirected to this URL.', 'shibboleth') ?></div>
 					</td>
 				</tr>
 			</table>
@@ -587,7 +609,9 @@ function shibboleth_options_page() {
 			the user in the highest ranking role.  Only a single header/value
 			pair is supported for each user role.  This may be expanded in the
 			future to support multiple header/value pairs or regular expression
-			values.</p>
+			values.  In the meantime, you can use the <em>shibboleth_roles</em> 
+			and <em>shibboleth_user_role</em> WordPress filters to provide your 
+			own logic for assigning user roles.</p>
 
 			<style type="text/css">
 				#role_mappings { padding: 0; }
@@ -601,6 +625,9 @@ function shibboleth_options_page() {
 					<th scope="row">Role Mappings</th>
 					<td id="role_mappings">
 						<table id="">
+						<col width="10%"></col>
+						<col></col>
+						<col></col>
 						<thead>
 							<tr>
 								<th></th>
@@ -614,9 +641,9 @@ function shibboleth_options_page() {
 					foreach ($wp_roles->role_names as $key => $name) {
 						echo'
 						<tr valign="top">
-							<th scope="row">'.$name.'</th>
-							<td><input type="text" id="role_'.$key.'_header" name="shibboleth_roles['.$key.'][header]" value="' . @$shib_roles[$key]['header'] . '" /></td>
-							<td><input type="text" id="role_'.$key.'_value" name="shibboleth_roles['.$key.'][value]" value="' . @$shib_roles[$key]['value'] . '" /></td>
+							<th scope="row">' . _c($name) . '</th>
+							<td><input type="text" id="role_'.$key.'_header" name="shibboleth_roles['.$key.'][header]" value="' . @$shib_roles[$key]['header'] . '" style="width: 100%" /></td>
+							<td><input type="text" id="role_'.$key.'_value" name="shibboleth_roles['.$key.'][value]" value="' . @$shib_roles[$key]['value'] . '" style="width: 100%" /></td>
 						</tr>';
 					}
 ?>
@@ -640,7 +667,7 @@ function shibboleth_options_page() {
 <?php
 			foreach ($wp_roles->role_names as $key => $name) {
 				echo '
-						<option value="'.$key.'"'. ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>'.$name.'</option>';
+						<option value="' . $key . '"' . ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>' . _c($name) . '</option>';
 			}
 ?>
 
@@ -651,8 +678,11 @@ function shibboleth_options_page() {
 					<th scope="row">Update User Roles</th>
 					<td>
 						<input type="checkbox" id="update_roles" name="update_roles" <?php echo shibboleth_get_option('shibboleth_update_roles') ? ' checked="checked"' : '' ?> />
-						<label for="update_roles">Use Shibboleth data to update user role mappings each time the user logs in.  This
-						will prevent you from setting user roles manually within WordPress.</label>
+						<label for="update_roles">Use Shibboleth data to update user role mappings each time the user logs in.</label>
+
+						<p>Be aware that if you use this option, you should <strong>not</strong> update user roles manually, 
+						since they will be overwritten from Shibboleth the next time the user logs in.</p>
+
 					  	<p>(Shibboleth data is always used to populate the initial user role during account creation.)</p>
 					</td>
 				</tr>
