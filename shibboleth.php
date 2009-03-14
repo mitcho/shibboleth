@@ -65,7 +65,13 @@ function shibboleth_activate_plugin() {
 register_activation_hook('shibboleth/shibboleth.php', 'shibboleth_activate_plugin');
 
 
-//TODO deactivation hook
+/**
+ * Cleanup certain plugins options on deactivation.
+ */
+function shibboleth_deactivate_plugin() {
+	shibboleth_remove_htaccess();
+}
+register_deactivation_hook('shibboleth/shibboleth.php', 'shibboleth_deactivate_plugin');
 
 
 /**
@@ -371,7 +377,6 @@ function shibboleth_profile_personal_options() {
 	$user = wp_get_current_user();
 	if (get_usermeta($user->ID, 'shibboleth_account')) {
 		add_filter('show_password_fields', create_function('$v', 'return false;'));
-		// TODO: add link to institution's password change page
 
 		if (shibboleth_get_option('shibboleth_update_users')) {
 			echo '
@@ -382,6 +387,27 @@ function shibboleth_profile_personal_options() {
 						.attr("disabled", true).after(cannot_change);
 				});
 			</script>';
+		}
+	}
+}
+
+
+/**
+ * Add change password link to the user profile for Shibboleth users.
+ */
+function shibboleth_show_user_profile() {
+	$user = wp_get_current_user();
+	if (get_usermeta($user->ID, 'shibboleth_account')) {
+		if (shibboleth_get_option('shibboleth_change_password_url')) {
+?>
+	<table class="form-table">
+		<tr>
+			<th>Change Password</th>
+			<td><a href="<?php echo shibboleth_get_option('shibboleth_change_password_url'); 
+				?>" target="_blank"><?php _e('Change your password', 'shibboleth'); ?></a></td>
+		</tr>
+	</table>
+<?php
 		}
 	}
 }
@@ -430,6 +456,7 @@ function shibboleth_admin_panels() {
 
 	add_action('profile_personal_options', 'shibboleth_profile_personal_options');
 	add_action('personal_options_update', 'shibboleth_personal_options_update');
+	add_action('show_user_profile', 'shibboleth_show_user_profile');
 }
 add_action('admin_menu', 'shibboleth_admin_panels');
 
@@ -457,6 +484,7 @@ function shibboleth_options_page() {
 
 		shibboleth_update_option('shibboleth_login_url', $_POST['login_url']);
 		shibboleth_update_option('shibboleth_logout_url', $_POST['logout_url']);
+		shibboleth_update_option('shibboleth_change_password_url', $_POST['change_password_url']);
 		shibboleth_update_option('shibboleth_update_users', $_POST['update_users']);
 		shibboleth_update_option('shibboleth_update_roles', $_POST['update_roles']);
 	}
@@ -488,6 +516,13 @@ function shibboleth_options_page() {
 				<tr valign="top">
 					<th scope="row"><label for="logout_url"><?php _e('Logout URL') ?></label</th>
 					<td><input type="text" id="logout_url" name="logout_url" value="<?php echo shibboleth_get_option('shibboleth_logout_url') ?>" size="50" /></td>
+				</tr>
+				<tr valign="top">
+					<th scope="row"><label for="change_password_url"><?php _e('Change Password URL') ?></label</th>
+					<td>
+						<input type="text" id="change_password_url" name="change_password_url" value="<?php echo shibboleth_get_option('shibboleth_change_password_url') ?>" size="50" />
+						<span class="setting-description">If this option is set, users will be directed to this URL in order to change their password.</span>
+					</td>
 				</tr>
 			</table>
 
@@ -641,6 +676,17 @@ function shibboleth_insert_htaccess() {
 		$htaccess = get_home_path() . '.htaccess';
 		$rules = array('AuthType Shibboleth', 'Require Shibboleth');
 		insert_with_markers($htaccess, 'Shibboleth', $rules);
+	}
+}
+
+
+/**
+ * Remove directives from .htaccess file to enable Shibboleth Lazy Sessions.
+ */
+function shibboleth_remove_htaccess() {
+	if (got_mod_rewrite()) {
+		$htaccess = get_home_path() . '.htaccess';
+		insert_with_markers($htaccess, 'Shibboleth', array());
 	}
 }
 
