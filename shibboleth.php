@@ -407,7 +407,12 @@ function shibboleth_personal_options_update() {
  **/
 function shibboleth_admin_panels() {
 	// global options page
-	$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), __('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
+	if (isset($GLOBALS['wpmu_version'])) {
+		$hookname = add_submenu_page('wpmu-admin.php', __('Shibboleth Options', 'shibboleth'), 
+			__('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
+	} else {
+		$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), __('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
+	}
 
 	add_action('profile_personal_options', 'shibboleth_profile_personal_options');
 	add_action('personal_options_update', 'shibboleth_personal_options_update');
