@@ -44,14 +44,18 @@ If it is unable to do so, you can add this manually:
     Require Shibboleth
 
 = For single-user WordPress =
+
 Upload the `shibboleth` folder to your WordPress plugins folder (probably
 /wp-content/plugins), and activate it through the WordPress admin panel.
 Configure it from the Shibboleth settings page.
 
 = For WordPress MU =
+
 Shibboleth works equally well with WordPress MU using either vhosts or folders
 for blogs.  Upload the `shibboleth` folder to your mu-plugins folder (probably
-/wp-content/mu-plugins).  No need to activate it, just configure it from the
+/wp-content/mu-plugins).  Move the file `shibboleth-mu.php` from the
+`shibboleth` folder up one directory so that it is in `mu-plugins` alongside
+the `shibboleth` folder.  No need to activate it, just configure it from the
 Shibboleth settings page.
 
 [properly installed]: https://spaces.internet2.edu/display/SHIB2/Installation
