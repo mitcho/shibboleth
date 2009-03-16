@@ -87,12 +87,14 @@ mechanisms to get back into your site.
 == Changelog ==
 
 = version 1.1 =
+ - cleaner integration with WordPress login form (now uses a custom action instead of hijacking the standard login action)
  - add option for enterprise password change URL -- shown on user profile page.
  - add option for enterprise password reset URL -- Shibboleth users are auto-redirected here if attempt WP password reset.
  - add plugin deactivation hook to remove .htaccess rules
  - add option to specify Shibboleth header for user nickname
  - add filters for all user attributes and user role (allow other plugins to override these values)
  - much cleaner interface on user edit admin page
+ - fix bug with options being overwritten in WordPress MU
 
 = version 1.0 =
  - now works properly with WordPress MU
