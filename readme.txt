@@ -80,8 +80,9 @@ mechanisms to get back into your site.
 
 == Screenshots ==
 
-1. Specify which Shibboleth headers map to user profile fields
-2. Assign users into WordPress roles based on arbitrary data provided by Shibboleth
+1. Configure login, logout, and password management URLs
+2. Specify which Shibboleth headers map to user profile fields
+3. Assign users into WordPress roles based on arbitrary data provided by Shibboleth
 
 == Changelog ==
 
