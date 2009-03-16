@@ -5,7 +5,7 @@
  Description: Easily externalize user authentication to a <a href="http://shibboleth.internet2.edu">Shibboleth</a> Service Provider
  Author: Will Norris
  Author URI: http://willnorris.com/
- Version: 0.1
+ Version: trunk
  License: Apache 2 (http://www.apache.org/licenses/LICENSE-2.0.html)
  */
 
