@@ -28,6 +28,7 @@ function shibboleth_activate_plugin() {
 	if (function_exists('switch_to_blog')) switch_to_blog($GLOBALS['current_site']->blog_id);
 
 	shibboleth_add_option('shibboleth_login_url', get_option('home') . '/Shibboleth.sso/Login');
+	shibboleth_add_option('shibboleth_default_login', true);
 	shibboleth_add_option('shibboleth_logout_url', get_option('home') . '/Shibboleth.sso/Logout');
 
 	$headers = array(
@@ -108,15 +109,7 @@ function shibboleth_wp_login() {
 
 
 	switch ($_REQUEST['action']) {
-		case 'local_login':
-			add_action('login_form', 'shibboleth_login_form');
-			break;
-
-		case 'login':
-		case '':
-			if (array_key_exists('checkemail', $_REQUEST)) return;
-			if (array_key_exists('wp-submit', $_POST)) break;
-
+		case 'shibboleth':
 			if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
 				shibboleth_finish_login();
 			} else {
@@ -124,7 +117,9 @@ function shibboleth_wp_login() {
 			}
 			break;
 
-		case 'logout':
+		case 'login':
+		case '':
+			add_action('login_form', 'shibboleth_login_form');
 			break;
 
 		case 'lostpassword':
@@ -146,6 +141,33 @@ function shibboleth_wp_login() {
 	}
 }
 
+
+function shibboleth_site_url($url, $path, $scheme) {
+	if ($path != 'wp-login.php') return $url;
+
+	// static boolean to track if we should process the URL.  This prevents 
+	// a recursive loop between this function and shibboleth_login_url()
+	static $skip = true;
+	if ($skip = (!$skip)) return $url;
+
+	$redirect_to = false;
+
+	if (shibboleth_get_option('shibboleth_default_login')) {
+		$url_parts = parse_url($url);
+		if (array_key_exists('query', $url_parts)) {
+			$query_args = parse_str($url_parts['query']);
+			if (array_key_exists('redirect_to', $query_args)) {
+				$redirect_to = $query_args['redirect_to'];
+			}
+		}
+
+		$url = shibboleth_login_url($redirect_to);
+	}
+
+	
+	return $url;
+}
+add_filter('site_url', 'shibboleth_site_url', 10, 3);
 
 /**
  * After logging out of WordPress, log user out of Shibboleth.
@@ -175,19 +197,21 @@ function shibboleth_start_login() {
  * @return the URL to direct the user to in order to initiate Shibboleth login
  * @uses apply_filters() Calls 'shibboleth_login_url' before returning Shibboleth login URL
  */
-function shibboleth_login_url() {
-
-	$target = site_url('wp-login.php');
+function shibboleth_login_url($redirect = false) {
 
 	// WordPress MU
 	if (function_exists('switch_to_blog')) {
 		switch_to_blog($GLOBALS['current_site']->blog_id);
 		$target = site_url('wp-login.php');
 		restore_current_blog();
+	} else {
+		$target = site_url('wp-login.php');
 	}
 
-	$target = add_query_arg('redirect_to', urlencode($_REQUEST['redirect_to']), $target);
-	$target = add_query_arg('action', 'login', $target);
+	if (!empty($redirect)) {
+		$target = add_query_arg('redirect_to', urlencode($redirect), $target);
+	}
+	$target = add_query_arg('action', 'shibboleth', $target);
 
 	$login_url = shibboleth_get_option('shibboleth_login_url');
 	$login_url = add_query_arg('target', urlencode($target), $login_url);
@@ -538,7 +562,7 @@ function shibboleth_options_page() {
 		shibboleth_update_option('shibboleth_logout_url', $_POST['logout_url']);
 		shibboleth_update_option('shibboleth_password_change_url', $_POST['password_change_url']);
 		shibboleth_update_option('shibboleth_password_reset_url', $_POST['password_reset_url']);
-
+		shibboleth_update_option('shibboleth_default_login', (boolean) $_POST['default_login']);
 		shibboleth_update_option('shibboleth_update_users', (boolean) $_POST['update_users']);
 		shibboleth_update_option('shibboleth_update_roles', (boolean) $_POST['update_roles']);
 	}
@@ -592,6 +616,17 @@ function shibboleth_options_page() {
 					<td>
 						<input type="text" id="password_reset_url" name="password_reset_url" value="<?php echo shibboleth_get_option('shibboleth_password_reset_url') ?>" size="50" /><br />
 						<?php _e('If this option is set, Shibboleth users who try to reset their forgotten password using WordPress will be redirected to this URL.', 'shibboleth') ?>
+					</td>
+				</tr>
+				<tr>
+				<th scope="row"><label for="default_login"><?php _e('Shibboleth is default login', 'shibboleth') ?></label></th>
+					<td>
+						<input type="checkbox" id="default_login" name="default_login" <?php echo shibboleth_get_option('shibboleth_default_login') ? ' checked="checked"' : '' ?> />
+						<label for="default_login"><?php _e('Use Shibboleth as the default login method for users.', 'shibboleth'); ?></label>
+
+						<p><?php _e('If set, this will cause all standard WordPress login links to initiate Shibboleth'
+							. ' login instead of local WordPress authentication.  Shibboleth login can always be'
+							. ' initiated from the WordPress login form by clicking the "Login with Shibboleth" link.', 'shibboleth'); ?></p>
 					</td>
 				</tr>
 			</table>
