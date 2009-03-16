@@ -14,18 +14,19 @@ This plugin is designed to support integrating your WordPress or WordPress MU
 blog into your existing identity management infrastructure using a
 [Shibboleth][] Service Provider.  
 
-All WordPress login requests will be sent to your configured Shibboleth
-Identity Provider or Discovery Service.  Upon successful authentication, a new
-WordPress account will be automatically provisioned for the user if one does
-not already exist.  User attributes (username, first name, last name, display
-name, and email address) can be synchronized with your enterprise's system of
-record each time the user logs into WordPress.  
+WordPress can be configure so that all standard login requests will be sent to
+your configured Shibboleth Identity Provider or Discovery Service.  Upon
+successful authentication, a new WordPress account will be automatically
+provisioned for the user if one does not already exist.  User attributes
+(username, first name, last name, display name, nickname, and email address)
+can be synchronized with your enterprise's system of record each time the user
+logs into WordPress.  
 
 Finally, the user's role within WordPress can be automatically set (and
 continually updated) based on any attribute Shibboleth provides.  For example,
-you may decide to give users with an eduPersonAffiliation value of 'faculty'
-the WordPress role of 'editor', while the eduPersonAffiliation value of
-'student' maps to the WordPress role 'contributor'.  Or you may choose to limit
+you may decide to give users with an eduPersonAffiliation value of *faculty*
+the WordPress role of *editor*, while the eduPersonAffiliation value of
+*student* maps to the WordPress role *contributor*.  Or you may choose to limit
 access to WordPress altogether using a special eduPersonEntitlement value.
 
 [Shibboleth]: http://shibboleth.internet2.edu/
@@ -46,17 +47,17 @@ If it is unable to do so, you can add this manually:
 = For single-user WordPress =
 
 Upload the `shibboleth` folder to your WordPress plugins folder (probably
-/wp-content/plugins), and activate it through the WordPress admin panel.
+`/wp-content/plugins`), and activate it through the WordPress admin panel.
 Configure it from the Shibboleth settings page.
 
 = For WordPress MU =
 
 Shibboleth works equally well with WordPress MU using either vhosts or folders
-for blogs.  Upload the `shibboleth` folder to your mu-plugins folder (probably
-/wp-content/mu-plugins).  Move the file `shibboleth-mu.php` from the
-`shibboleth` folder up one directory so that it is in `mu-plugins` alongside
-the `shibboleth` folder.  No need to activate it, just configure it from the
-Shibboleth settings page.
+for blogs.  Upload the `shibboleth` folder to your `mu-plugins` folder
+(probably `/wp-content/mu-plugins`).  Move the file `shibboleth-mu.php` from
+the `shibboleth` folder up one directory so that it is in `mu-plugins`
+alongside the `shibboleth` folder.  No need to activate it, just configure it
+from the Shibboleth settings page, found under "Site Admin".
 
 [properly installed]: https://spaces.internet2.edu/display/SHIB2/Installation
 
@@ -64,19 +65,36 @@ Shibboleth settings page.
 
 = What is Shibboleth? =
 
-<http://shibboleth.internet2.edu/>
+From [the Shibboleth homepage][]: 
 
-= Can I still login using my local 'admin' account? =
+> The Shibboleth System is a standards based, open source software package for
+> web single sign-on across or within organizational boundaries. It allows
+> sites to make informed authorization decisions for individual access of
+> protected online resources in a privacy-preserving manner.
 
-Yes. Simply specify the login action `local_login`, like so:
+[the Shibboleth homepage]: http://shibboleth.internet2.edu/
 
-	navigate to http://yoursite.com/wp-login.php?action=local_login
+= Can I extend the Shibboleth plugin to provide custom logic? =
 
-= I've broken something and can't get into my WordPress site at all =
+Yes, the plugin provides a number of new [actions][] and [filters][] that can
+be used to extend the functionality of the plugin.  Search `shibboleth.php` for
+occurances of the function calls `apply_filters` and `do_action` to find them
+all.  Then [write a new plugin][] that makes use of the hooks.  If your require
+additional hooks to allow for extending other parts of the plugin, please
+notify the [plugin author][].
 
-You can forcibly disable the plugin by deleting or renaming the plugin folder.
-This should allow you to then use the normal WordPress account recovery
-mechanisms to get back into your site.
+Before extending the plugin in this manner, please ensure that it is not
+actually more appropriate to add this logic to Shibboleth.  It may make more
+sense to add a new attribute to your Shibboleth Identity Provider's attribute
+store (e.g. LDAP directory), or a new attribute definition to the  Identity
+Provider's internal attribute resolver or the Shibboleth Service Provider's
+internal attribute extractor.  In the end, the Shibboleth administrator will
+have to make that call as to what is most appropriate.
+
+[actions]: http://codex.wordpress.org/Plugin_API#Actions
+[filters]: http://codex.wordpress.org/Plugin_API#Filters
+[write a new plugin]: http://codex.wordpress.org/Writing_a_Plugin
+[plugin author]: http://willnorris.com/
 
 == Screenshots ==
 
