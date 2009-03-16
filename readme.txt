@@ -72,7 +72,7 @@ Yes. Simply specify the login action `local_login`, like so:
 
 	navigate to http://yoursite.com/wp-login.php?action=local_login
 
-= I've screwed something up and can't get into my WordPress site at all =
+= I've broken something and can't get into my WordPress site at all =
 
 You can forcibly disable the plugin by deleting or renaming the plugin folder.
 This should allow you to then use the normal WordPress account recovery
@@ -84,6 +84,14 @@ mechanisms to get back into your site.
 2. Assign users into WordPress roles based on arbitrary data provided by Shibboleth
 
 == Changelog ==
+
+= version 1.1 =
+ - add option for enterprise password change URL -- shown on user profile page.
+ - add option for enterprise password reset URL -- Shibboleth users are auto-redirected here if attempt WP password reset.
+ - add plugin deactivation hook to remove .htaccess rules
+ - add option to specify Shibboleth header for user nickname
+ - add filters for all user attributes and user role (allow other plugins to override these values)
+ - much cleaner interface on user edit admin page
 
 = version 1.0 =
  - now works properly with WordPress MU
