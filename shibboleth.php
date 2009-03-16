@@ -531,6 +531,8 @@ function shibboleth_admin_panels() {
 		$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), 'Shibboleth', 8, 'shibboleth-options', 'shibboleth_options_page' );
 	}
 
+	add_contextual_help($hookname, shibboleth_help_text());
+
 	add_action('profile_personal_options', 'shibboleth_profile_personal_options');
 	add_action('personal_options_update', 'shibboleth_personal_options_update');
 	add_action('show_user_profile', 'shibboleth_show_user_profile');
@@ -538,6 +540,17 @@ function shibboleth_admin_panels() {
 }
 add_action('admin_menu', 'shibboleth_admin_panels');
 
+
+function shibboleth_help_text() {
+	$text = '
+	<ul>
+		<li><a href="https://spaces.internet2.edu/display/SHIB/" target="_blank">Shibboleth 1.3 Wiki</a></li>
+		<li><a href="https://spaces.internet2.edu/display/SHIB2/" target="_blank">Shibboleth 2 Wiki</a></li>
+		<li><a href="http://shibboleth.internet2.edu/lists.html" target="_blank">Shibboleth Mailing Lists</a></li>
+	</ul>';
+
+	return $text;
+}
 
 /**
  * WordPress options page to configure the Shibboleth plugin.
@@ -592,6 +605,9 @@ function shibboleth_options_page() {
 						<?php _e('This URL is constructed from values found in your main Shibboleth'
 							. ' SP configuration file: your site hostname, the Sessions handlerURL,'
 							. ' and the SessionInitiator Location.', 'shibboleth'); ?>
+						<br /><?php _e('Wiki Documentation', 'shibboleth') ?>: 
+						<a href="https://spaces.internet2.edu/display/SHIB/SessionInitiator" target="_blank">Shibboleth 1.3</a> |
+						<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPSessionInitiator" target="_blank">Shibboleth 2</a>
 					</td>
 				</tr>
 				<tr valign="top">
@@ -602,6 +618,9 @@ function shibboleth_options_page() {
 							. ' SP configuration file: your site hostname, the Sessions handlerURL,'
 							. ' and the LogoutInitiator Location (also known as the'
 							. ' SingleLogoutService Location in Shibboleth 1.3).', 'shibboleth'); ?>
+						<br /><?php _e('Wiki Documentation', 'shibboleth') ?>: 
+						<a href="https://spaces.internet2.edu/display/SHIB/SPMainConfig" target="_blank">Shibboleth 1.3</a> |
+						<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPLogoutInitiator" target="_blank">Shibboleth 2</a>
 					</td>
 				</tr>
 				<tr valign="top">
@@ -638,6 +657,12 @@ function shibboleth_options_page() {
 			<p><?php _e('Define the Shibboleth headers which should be mapped to each user profile attribute.  These'
 				. ' header names are configured in <code>attribute-map.xml</code> (for Shibboleth 2.x) or'
 				. ' <code>AAP.xml</code> (for Shibboleth 1.x).', 'shibboleth') ?></p>
+
+			<p>
+				<?php _e('Wiki Documentation', 'shibboleth') ?>: 
+				<a href="https://spaces.internet2.edu/display/SHIB/AttributeAcceptancePolicy" target="_blank">Shibboleth 1.3</a> |
+				<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPAddAttribute" target="_blank">Shibboleth 2</a>
+			</p>
 
 			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5" width="100%">
 				<tr valign="top">
