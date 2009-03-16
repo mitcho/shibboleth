@@ -273,7 +273,7 @@ function shibboleth_finish_login() {
 	wp_set_auth_cookie($user->ID, $remember);
 	do_action('wp_login', $user->user_login);
 
-	// redirect user to whever they were going
+	// redirect user to wherever they were going
 	$request_redirect = (isset($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : '');
 	$redirect_to = ($request_redirect ? $request_redirect : admin_url());
 	$redirect_to = apply_filters('login_redirect', $redirect_to, $request_redirect, $user);
@@ -379,7 +379,7 @@ function shibboleth_update_user_data($user_id) {
  */
 function shibboleth_login_form() {
 	$login_url = shibboleth_login_url();
-	echo '<p id="shibboleth_login"><a href="' . $login_url . '">Login with Shibboleth</a></p>';
+	echo '<p id="shibboleth_login"><a href="' . $login_url . '">' . __('Login with Shibboleth', 'shibboleth') . '</a></p>';
 }
 
 
@@ -502,10 +502,9 @@ function shibboleth_personal_options_update() {
 function shibboleth_admin_panels() {
 	// global options page
 	if (isset($GLOBALS['wpmu_version'])) {
-		$hookname = add_submenu_page('wpmu-admin.php', __('Shibboleth Options', 'shibboleth'), 
-			__('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
+		$hookname = add_submenu_page('wpmu-admin.php', __('Shibboleth Options', 'shibboleth'), 'Shibboleth', 8, 'shibboleth-options', 'shibboleth_options_page' );
 	} else {
-		$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), __('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
+		$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), 'Shibboleth', 8, 'shibboleth-options', 'shibboleth_options_page' );
 	}
 
 	add_action('profile_personal_options', 'shibboleth_profile_personal_options');
@@ -527,13 +526,11 @@ function shibboleth_options_page() {
 	if (isset($_POST['submit'])) {
 		check_admin_referer('shibboleth_update_options');
 
-		$shib_headers = shibboleth_get_option('shibboleth_headers');
-		if (!is_array($shib_headers)) $shib_headers = array();
+		$shib_headers = (array) shibboleth_get_option('shibboleth_headers');
 		$shib_headers = array_merge($shib_headers, $_POST['headers']);
 		shibboleth_update_option('shibboleth_headers', $shib_headers);
 
-		$shib_roles = shibboleth_get_option('shibboleth_roles');
-		if (!is_array($shib_roles)) $shib_roles = array();
+		$shib_roles = (array) shibboleth_get_option('shibboleth_roles');
 		$shib_roles = array_merge($shib_roles, $_POST['shibboleth_roles']);
 		shibboleth_update_option('shibboleth_roles', $shib_roles);
 
@@ -541,8 +538,9 @@ function shibboleth_options_page() {
 		shibboleth_update_option('shibboleth_logout_url', $_POST['logout_url']);
 		shibboleth_update_option('shibboleth_password_change_url', $_POST['password_change_url']);
 		shibboleth_update_option('shibboleth_password_reset_url', $_POST['password_reset_url']);
-		shibboleth_update_option('shibboleth_update_users', $_POST['update_users']);
-		shibboleth_update_option('shibboleth_update_roles', $_POST['update_roles']);
+
+		shibboleth_update_option('shibboleth_update_users', (boolean) $_POST['update_users']);
+		shibboleth_update_option('shibboleth_update_roles', (boolean) $_POST['update_roles']);
 	}
 
 	$shib_headers = shibboleth_get_option('shibboleth_headers');
@@ -564,27 +562,36 @@ function shibboleth_options_page() {
 
 			<table class="form-table">
 				<tr valign="top">
-					<th scope="row"><label for="login_url"><?php _e('Session Initiator URL') ?></label</th>
+					<th scope="row"><label for="login_url"><?php _e('Session Initiator URL', 'shibboleth') ?></label</th>
 					<td>
-						<input type="text" id="login_url" name="login_url" value="<?php echo shibboleth_get_option('shibboleth_login_url') ?>" size="50" />
+						<input type="text" id="login_url" name="login_url" value="<?php echo shibboleth_get_option('shibboleth_login_url') ?>" size="50" /><br />
+						<?php _e('This URL is constructed from values found in your main Shibboleth'
+							. ' SP configuration file: your site hostname, the Sessions handlerURL,'
+							. ' and the SessionInitiator Location.', 'shibboleth'); ?>
 					</td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="logout_url"><?php _e('Logout URL') ?></label</th>
-					<td><input type="text" id="logout_url" name="logout_url" value="<?php echo shibboleth_get_option('shibboleth_logout_url') ?>" size="50" /></td>
-				</tr>
-				<tr valign="top">
-					<th scope="row"><label for="password_change_url"><?php _e('Password Change URL') ?></label</th>
+					<th scope="row"><label for="logout_url"><?php _e('Logout URL', 'shibboleth') ?></label</th>
 					<td>
-						<input type="text" id="password_change_url" name="password_change_url" value="<?php echo shibboleth_get_option('shibboleth_password_change_url') ?>" size="50" />
-						<div class="setting-description"><?php _e('If this option is set, Shibboleth users will be instructed to use this URL in order to change their password.', 'shibboleth') ?></div>
+						<input type="text" id="logout_url" name="logout_url" value="<?php echo shibboleth_get_option('shibboleth_logout_url') ?>" size="50" /><br />
+						<?php _e('This URL is constructed from values found in your main Shibboleth'
+							. ' SP configuration file: your site hostname, the Sessions handlerURL,'
+							. ' and the LogoutInitiator Location (also known as the'
+							. ' SingleLogoutService Location in Shibboleth 1.3).', 'shibboleth'); ?>
 					</td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="password_reset_url"><?php _e('Password Reset URL') ?></label</th>
+					<th scope="row"><label for="password_change_url"><?php _e('Password Change URL', 'shibboleth') ?></label</th>
 					<td>
-						<input type="text" id="password_reset_url" name="password_reset_url" value="<?php echo shibboleth_get_option('shibboleth_password_reset_url') ?>" size="50" />
-						<div class="setting-description"><?php _e('If this option is set, Shibboleth users who try to reset their forgotten password using WordPress will be redirected to this URL.', 'shibboleth') ?></div>
+						<input type="text" id="password_change_url" name="password_change_url" value="<?php echo shibboleth_get_option('shibboleth_password_change_url') ?>" size="50" /><br />
+						<?php _e('If this option is set, Shibboleth users will see a "change password" link on their profile page directing them to this URL.', 'shibboleth') ?>
+					</td>
+				</tr>
+				<tr valign="top">
+					<th scope="row"><label for="password_reset_url"><?php _e('Password Reset URL', 'shibboleth') ?></label</th>
+					<td>
+						<input type="text" id="password_reset_url" name="password_reset_url" value="<?php echo shibboleth_get_option('shibboleth_password_reset_url') ?>" size="50" /><br />
+						<?php _e('If this option is set, Shibboleth users who try to reset their forgotten password using WordPress will be redirected to this URL.', 'shibboleth') ?>
 					</td>
 				</tr>
 			</table>
@@ -593,10 +600,9 @@ function shibboleth_options_page() {
 
 			<h3><?php _e('User Profile Data', 'shibboleth') ?></h3>
 
-			<p>Define the Shibboleth headers which should be mapped to each
-			user profile attribute.  These header names are configured in
-			<code>attribute-map.xml</code> (for Shibboleth 2.x) or
-			<code>AAP.xml</code> (for Shibboleth 1.x).</p>
+			<p><?php _e('Define the Shibboleth headers which should be mapped to each user profile attribute.  These'
+				. ' header names are configured in <code>attribute-map.xml</code> (for Shibboleth 2.x) or'
+				. ' <code>AAP.xml</code> (for Shibboleth 1.x).', 'shibboleth') ?></p>
 
 			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5" width="100%">
 				<tr valign="top">
@@ -624,12 +630,14 @@ function shibboleth_options_page() {
 					<td><input type="text" id="email" name="headers[email]" value="<?php echo $shib_headers['email'] ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="update_users"><?php _e('Update User Data') ?></label</th>
+					<th scope="row"><label for="update_users"><?php _e('Update User Data', 'shibboleth') ?></label</th>
 					<td>
 						<input type="checkbox" id="update_users" name="update_users" <?php echo shibboleth_get_option('shibboleth_update_users') ? ' checked="checked"' : '' ?> />
-						<label for="update_users">Use Shibboleth data to update user profile data each time the user logs in.  This will prevent users from being
-						able to manually update these fields.</label>
-					  	<p>(Shibboleth data is always used to populate the user profile during account creation.)</p>
+						<label for="update_users"><?php _e('Use Shibboleth data to update user profile data each time the user logs in.', 'shibboleth'); ?></label>
+
+						<p><?php _e('This will prevent users from being able to manually update these'
+							. ' fields.  Note that Shibboleth data is always used to populate the user'
+							. ' profile during account creation.', 'shibboleth'); ?></p>
 
 					</td>
 				</tr>
@@ -639,20 +647,18 @@ function shibboleth_options_page() {
 
 			<h3><?php _e('User Role Mappings', 'shibboleth') ?></h3>
 
-			<p>Users can be placed into one of WordPress's internal roles
-			based on any attribute.  For example, you could define a special
-			eduPersonEntitlement value that designates the user as a WordPress
-			Administrator.  Or you could automatically place all users with an
-			eduPersonAffiliation of "faculty" in the Author role.</p>
+			<p><?php _e('Users can be placed into one of WordPress\'s internal roles based on any'
+				. ' attribute.  For example, you could define a special eduPersonEntitlement value'
+				. ' that designates the user as a WordPress Administrator.  Or you could automatically'
+				. ' place all users with an eduPersonAffiliation of "faculty" in the Author role.', 'shibboleth'); ?></p>
 
-			<p><strong>Current Limitations:</strong> While WordPress supports
-			users having multiple roles, the Shibboleth plugin will only place
-			the user in the highest ranking role.  Only a single header/value
-			pair is supported for each user role.  This may be expanded in the
-			future to support multiple header/value pairs or regular expression
-			values.  In the meantime, you can use the <em>shibboleth_roles</em> 
-			and <em>shibboleth_user_role</em> WordPress filters to provide your 
-			own logic for assigning user roles.</p>
+			<p><?php _e('<strong>Current Limitations:</strong> While WordPress supports users having'
+				. ' multiple roles, the Shibboleth plugin will only place the user in the highest ranking'
+				. ' role.  Only a single header/value pair is supported for each user role.  This may be'
+				. ' expanded in the future to support multiple header/value pairs or regular expression'
+				. ' values.  In the meantime, you can use the <em>shibboleth_roles</em> and'
+				. ' <em>shibboleth_user_role</em> WordPress filters to provide your own logic for assigning'
+				. ' user roles.', 'shibboleth'); ?></p>
 
 			<style type="text/css">
 				#role_mappings { padding: 0; }
@@ -663,7 +669,7 @@ function shibboleth_options_page() {
 			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5" width="100%">
 
 				<tr>
-					<th scope="row">Role Mappings</th>
+					<th scope="row"><?php _e('Role Mappings', 'shibboleth') ?></th>
 					<td id="role_mappings">
 						<table id="">
 						<col width="10%"></col>
@@ -672,8 +678,8 @@ function shibboleth_options_page() {
 						<thead>
 							<tr>
 								<th></th>
-								<th scope="column">Header Name</th>
-								<th scope="column">Header Value</th>
+								<th scope="column"><?php _e('Header Name', 'shibboleth') ?></th>
+								<th scope="column"><?php _e('Header Value', 'shibboleth') ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -695,36 +701,34 @@ function shibboleth_options_page() {
 				</tr>
 
 				<tr>
-					<th scope="row">Default Role</th>
+					<th scope="row"><?php _e('Default Role', 'shibboleth') ?></th>
 					<td>
-						<p>If a user does not map into any of the roles above,
-						they will be placed into the default role.  If there is
-						no default role, the user will not be able to
-						login with Shibboleth.</p>
-
 						<select id="default_role" name="shibboleth_roles[default]">
-						<option value="">(none)</option>';
-
+						<option value=""><?php _e('(none)') ?></option>
 <?php
 			foreach ($wp_roles->role_names as $key => $name) {
 				echo '
 						<option value="' . $key . '"' . ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>' . _c($name) . '</option>';
 			}
 ?>
+						</select>
 
-					</select></td>
+						<p><?php _e('If a user does not map into any of the roles above, they will'
+							. ' be placed into the default role.  If there is no default role, the'
+							. ' user will not be able to login with Shibboleth.', 'shibboleth'); ?></p>
+					</td>
 				</tr>
 
 				<tr>
-					<th scope="row">Update User Roles</th>
+					<th scope="row"><label for="update_roles"><?php _e('Update User Roles', 'shibboleth') ?></label></th>
 					<td>
 						<input type="checkbox" id="update_roles" name="update_roles" <?php echo shibboleth_get_option('shibboleth_update_roles') ? ' checked="checked"' : '' ?> />
-						<label for="update_roles">Use Shibboleth data to update user role mappings each time the user logs in.</label>
+						<label for="update_roles"><?php _e('Use Shibboleth data to update user role mappings each time the user logs in.', 'shibboleth') ?></label>
 
-						<p>Be aware that if you use this option, you should <strong>not</strong> update user roles manually, 
-						since they will be overwritten from Shibboleth the next time the user logs in.</p>
+						<p><?php _e('Be aware that if you use this option, you should <strong>not</strong> update user roles manually,'
+						. ' since they will be overwritten from Shibboleth the next time the user logs in.  Note that Shibboleth data'
+					   	. ' is always used to populate the initial user role during account creation.', 'shibboleth') ?></p>
 
-					  	<p>(Shibboleth data is always used to populate the initial user role during account creation.)</p>
 					</td>
 				</tr>
 			</table>
