@@ -141,7 +141,7 @@ function shibboleth_wp_login() {
 
 
 function shibboleth_site_url($url, $path, $scheme) {
-	if ($path != 'wp-login.php') return $url;
+	if ($path != 'wp-login.php' || $scheme == 'login_post') return $url;
 
 	// static boolean to track if we should process the URL.  This prevents 
 	// a recursive loop between this function and shibboleth_login_url()
