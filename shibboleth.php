@@ -90,8 +90,7 @@ if (has_filter('authenticate')) {
  * Authenticate the user.
  */
 function shibboleth_authenticate($user, $username, $password) {
-	global $action;
-	if ($action == 'local_login' || array_key_exists('loggedout', $_REQUEST) || array_key_exists('wp-submit', $_POST)) return $user;
+	if (array_key_exists('loggedout', $_REQUEST) || array_key_exists('wp-submit', $_POST)) return $user;
 
 	if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
 		return shibboleth_authenticate_user();
@@ -106,7 +105,6 @@ function shibboleth_authenticate($user, $username, $password) {
  */
 function shibboleth_wp_login() {
 	if ($GLOBALS['pagenow'] != 'wp-login.php') return;
-
 
 	switch ($_REQUEST['action']) {
 		case 'shibboleth':
@@ -423,6 +421,9 @@ function shibboleth_profile_personal_options() {
 					jQuery("#first_name,#last_name,#nickname,#display_name,#email").attr("disabled", true);
 					jQuery("h3:contains(\'Name\')").after("<div class=\"updated fade\"><p>' 
 						. __('These fields cannot be changed from WordPress.', 'shibboleth') . '<p></div>");
+					jQuery("form#your-profile").submit(function() {
+						jQuery("#first_name,#last_name,#nickname,#display_name,#email").attr("disabled", false);
+					});
 				});
 			</script>';
 		}
