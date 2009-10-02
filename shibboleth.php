@@ -101,7 +101,7 @@ function shibboleth_migrate_old_data() {
 	if ( $updated ) {
 		shibboleth_update_option('shibboleth_headers', $headers);
 	}
-	shibboleth_remove_option('shibboleth_update_users');
+	shibboleth_delete_option('shibboleth_update_users');
 
 }
 
