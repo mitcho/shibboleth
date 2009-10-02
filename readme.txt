@@ -1,8 +1,8 @@
 === Shibboleth ===
 Contributors: wnorris 
 Tags: shibboleth, authentication, login, saml
-Requires at least: 2.6
-Tested up to: 2.7.1
+Requires at least: 2.8
+Tested up to: 2.8.4
 Stable tag: 1.2
 
 Allows WordPress to externalize user authentication and account creation to a
@@ -53,11 +53,8 @@ Configure it from the Shibboleth settings page.
 = For WordPress MU =
 
 Shibboleth works equally well with WordPress MU using either vhosts or folders
-for blogs.  Upload the `shibboleth` folder to your `mu-plugins` folder
-(probably `/wp-content/mu-plugins`).  Move the file `shibboleth-mu.php` from
-the `shibboleth` folder up one directory so that it is in `mu-plugins`
-alongside the `shibboleth` folder.  No need to activate it, just configure it
-from the Shibboleth settings page, found under "Site Admin".
+for blogs.  Upload the `shibboleth` folder to your `plugins` folder (the
+`mu-plugins` folder is no longer supported) and activate the plugin site wide.
 
 [properly installed]: https://spaces.internet2.edu/display/SHIB2/Installation
 
@@ -104,11 +101,16 @@ have to make that call as to what is most appropriate.
 
 == Changelog ==
 
-= version 1.2 =
+= version 1.3 (TBD) = 
+ - required WordPress version bumped to 2.8
+ - much cleaner integration with WordPress authentication system
+ - individual user profile fields can be designated as managed by Shibboleth
+
+= version 1.2 (2009-04-21) =
  - fix bug where shibboleth users couldn't update their profile. (props pchapman on bug report)
  - fix bug where local logins were being sent to shibboleth
 
-= version 1.1 =
+= version 1.1 (2009-03-16) =
  - cleaner integration with WordPress login form (now uses a custom action instead of hijacking the standard login action)
  - add option for enterprise password change URL -- shown on user profile page.
  - add option for enterprise password reset URL -- Shibboleth users are auto-redirected here if attempt WP password reset.
@@ -118,7 +120,7 @@ have to make that call as to what is most appropriate.
  - much cleaner interface on user edit admin page
  - fix bug with options being overwritten in WordPress MU
 
-= version 1.0 =
+= version 1.0 (2009-03-14) =
  - now works properly with WordPress MU
  - move Shibboleth menu to Site Admin for WordPress MU (props: Chris Bland)
  - lots of code cleanup and documentation

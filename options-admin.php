@@ -10,10 +10,12 @@ add_action('admin_menu', 'shibboleth_admin_panels');
  **/
 function shibboleth_admin_panels() {
 	// global options page
-	if (isset($GLOBALS['wpmu_version'])) {
-		$hookname = add_submenu_page('wpmu-admin.php', __('Shibboleth Options', 'shibboleth'), 'Shibboleth', 8, 'shibboleth-options', 'shibboleth_options_page' );
+	if ( function_exists('is_site_admin') ) {
+		$hookname = add_submenu_page('wpmu-admin.php', __('Shibboleth Options', 'shibboleth'), 
+			__('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
 	} else {
-		$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), 'Shibboleth', 8, 'shibboleth-options', 'shibboleth_options_page' );
+		$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), 
+			__('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
 	}
 
 	add_contextual_help($hookname, shibboleth_help_text());
@@ -26,9 +28,9 @@ function shibboleth_admin_panels() {
 function shibboleth_help_text() {
 	$text = '
 	<ul>
-		<li><a href="https://spaces.internet2.edu/display/SHIB/" target="_blank">Shibboleth 1.3 Wiki</a></li>
-		<li><a href="https://spaces.internet2.edu/display/SHIB2/" target="_blank">Shibboleth 2 Wiki</a></li>
-		<li><a href="http://shibboleth.internet2.edu/lists.html" target="_blank">Shibboleth Mailing Lists</a></li>
+		<li><a href="https://spaces.internet2.edu/display/SHIB/" target="_blank">' . __('Shibboleth 1.3 Wiki', 'shibboleth') . '</a></li>
+		<li><a href="https://spaces.internet2.edu/display/SHIB2/" target="_blank">' . __('Shibboleth 2 Wiki', 'shibboleth') . '</a></li>
+		<li><a href="http://shibboleth.internet2.edu/lists.html" target="_blank">' . __('Shibboleth Mailing Lists', 'shibboleth') . '</a></li>
 	</ul>';
 
 	return $text;
