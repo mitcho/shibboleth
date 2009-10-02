@@ -147,44 +147,54 @@ function shibboleth_options_page() {
 				<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPAddAttribute" target="_blank">Shibboleth 2</a>
 			</p>
 
-			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5" width="100%">
+			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5">
 				<tr valign="top">
 					<th scope="row"><label for="username"><?php _e('Username') ?></label</th>
-					<td><input type="text" id="username" name="headers[username]" value="<?php echo $shib_headers['username'] ?>" /></td>
+					<td><input type="text" id="username" name="headers[username][name]" value="<?php echo 
+						$shib_headers['username']['name'] ?>" /></td>
+					<td width="60%"></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="first_name"><?php _e('First name') ?></label</th>
-					<td><input type="text" id="first_name" name="headers[first_name]" value="<?php echo $shib_headers['first_name'] ?>" /></td>
+					<td><input type="text" id="first_name" name="headers[first_name][name]" value="<?php echo 
+						$shib_headers['first_name']['name'] ?>" /></td>
+					<td><input type="checkbox" id="first_name_managed" name="headers[first_name][managed]" <?php 
+						checked($shib_headers['first_name']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="last_name"><?php _e('Last name') ?></label</th>
-					<td><input type="text" id="last_name" name="headers[last_name]" value="<?php echo $shib_headers['last_name'] ?>" /></td>
+					<td><input type="text" id="last_name" name="headers[last_name][name]" value="<?php echo 
+						$shib_headers['last_name']['name'] ?>" /></td>
+					<td><input type="checkbox" id="last_name_managed" name="headers[last_name][managed]" <?php 
+						checked($shib_headers['last_name']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="nickname"><?php _e('Nickname') ?></label</th>
-					<td><input type="text" id="nickname" name="headers[nickname]" value="<?php echo $shib_headers['nickname'] ?>" /></td>
+					<td><input type="text" id="nickname" name="headers[nickname][name]" value="<?php echo 
+						$shib_headers['nickname']['name'] ?>" /></td>
+					<td><input type="checkbox" id="nickname_managed" name="headers[nickname][managed]" <?php 
+						checked($shib_headers['nickname']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="display_name"><?php _e('Display name') ?></label</th>
-					<td><input type="text" id="display_name" name="headers[display_name]" value="<?php echo $shib_headers['display_name'] ?>" /></td>
+					<th scope="row"><label for="_display_name"><?php _e('Display name', 'shibboleth') ?></label</th>
+					<td><input type="text" id="_display_name" name="headers[display_name][name]" value="<?php echo 
+						$shib_headers['display_name']['name'] ?>" /></td>
+					<td><input type="checkbox" id="display_name_managed" name="headers[display_name][managed]" <?php 
+						checked($shib_headers['display_name']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><label for="email"><?php _e('Email Address') ?></label</th>
-					<td><input type="text" id="email" name="headers[email]" value="<?php echo $shib_headers['email'] ?>" /></td>
-				</tr>
-				<tr valign="top">
-					<th scope="row"><label for="update_users"><?php _e('Update User Data', 'shibboleth') ?></label</th>
-					<td>
-						<input type="checkbox" id="update_users" name="update_users" <?php echo shibboleth_get_option('shibboleth_update_users') ? ' checked="checked"' : '' ?> />
-						<label for="update_users"><?php _e('Use Shibboleth data to update user profile data each time the user logs in.', 'shibboleth'); ?></label>
-
-						<p><?php _e('This will prevent users from being able to manually update these'
-							. ' fields.  Note that Shibboleth data is always used to populate the user'
-							. ' profile during account creation.', 'shibboleth'); ?></p>
-
-					</td>
+					<th scope="row"><label for="email"><?php _e('Email Address', 'shibboleth') ?></label</th>
+					<td><input type="text" id="email" name="headers[email][name]" value="<?php echo 
+						$shib_headers['email']['name'] ?>" /></td>
+					<td><input type="checkbox" id="email_managed" name="headers[email][managed]" <?php 
+						checked($shib_headers['email']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 			</table>
+
+			<p><?php _e('<em>Managed</em> profile fields are updated each time the user logs in using the current'
+				. ' data provided by Shibboleth.  Additionally, users will be prevented from manually updating these'
+				. '	fields from within WordPress.  Note that Shibboleth data is always used to populate the user'
+				. ' profile during initial account creation.', 'shibboleth'); ?></p>
 
 			<br class="clear" />
 

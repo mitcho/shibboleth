@@ -33,12 +33,12 @@ function shibboleth_activate_plugin() {
 	shibboleth_add_option('shibboleth_logout_url', get_option('home') . '/Shibboleth.sso/Logout');
 
 	$headers = array(
-		'username' => 'eppn',
-		'first_name' => 'givenName',
-		'last_name' => 'sn',
-		'nickname' => 'eppn',
-		'display_name' => 'displayName',
-		'email' => 'mail',
+		'username' => array( 'name' => 'eppn', 'managed' => false),
+		'first_name' => array( 'name' => 'givenName', 'managed' => true),
+		'last_name' => array( 'name' => 'sn', 'managed' => true),
+		'nickname' => array( 'name' => 'eppn', 'managed' => true),
+		'display_name' => array( 'name' => 'displayName', 'managed' => true),
+		'email' => array( 'name' => 'mail', 'managed' => true),
 	);
 	shibboleth_add_option('shibboleth_headers', $headers);
 
@@ -51,14 +51,16 @@ function shibboleth_activate_plugin() {
 			'header' => 'affiliation',
 			'value' => 'faculty',
 		),
+		// TODO: this could likely do strange things if WordPress has an actual role named 'default'
 		'default' => 'subscriber',
 	);
 	shibboleth_add_option('shibboleth_roles', $roles);
 
-	shibboleth_add_option('shibboleth_update_users', true);
 	shibboleth_add_option('shibboleth_update_roles', true);
 
 	shibboleth_insert_htaccess();
+
+	shibboleth_migrate_old_data();
 
 	shibboleth_update_option('shibboleth_plugin_revision', SHIBBOLETH_PLUGIN_REVISION);
 
@@ -75,6 +77,33 @@ function shibboleth_deactivate_plugin() {
 }
 register_deactivation_hook('shibboleth/shibboleth.php', 'shibboleth_deactivate_plugin');
 
+
+/**
+ * Migrate old data to newer formats.
+ */
+function shibboleth_migrate_old_data() {
+
+	// new header format, allowing each header to be marked as 'managed' individually
+	$managed = shibboleth_get_option('shibboleth_update_users');
+	$headers = shibboleth_get_option('shibboleth_headers');
+	$updated = false;
+
+	foreach ($headers as $key => $value) {
+		if ( is_string($value) ) {
+			$headers[$key] = array(
+				'name' => $value,
+				'managed' => $managed,
+			);
+			$updated = true;
+		}
+	}
+
+	if ( $updated ) {
+		shibboleth_update_option('shibboleth_headers', $headers);
+	}
+	shibboleth_remove_option('shibboleth_update_users');
+
+}
 
 /**
  * Load Shibboleth admin hooks only on admin page loads.  
@@ -240,7 +269,7 @@ function shibboleth_authenticate_user() {
 		return new WP_Error('no_access', __('You do not have sufficient access.'));
 	}
 
-	$username = $_SERVER[$shib_headers['username']];
+	$username = $_SERVER[$shib_headers['username']['name']];
 	$user = new WP_User($username);
 
 	if ( $user->ID ) {
@@ -265,7 +294,7 @@ function shibboleth_authenticate_user() {
 
 	// update user data
 	update_usermeta($user->ID, 'shibboleth_account', true);
-	if ( shibboleth_get_option('shibboleth_update_users') ) shibboleth_update_user_data($user->ID);
+	shibboleth_update_user_data($user->ID);
 	if ( shibboleth_get_option('shibboleth_update_roles') ) $user->set_role($user_role);
 
 	return $user;
@@ -288,7 +317,7 @@ function shibboleth_create_new_user($user_login) {
 	update_usermeta($user->ID, 'shibboleth_account', true);
 
 	// always update user data and role on account creation
-	shibboleth_update_user_data($user->ID);
+	shibboleth_update_user_data($user->ID, true);
 	$user_role = shibboleth_get_user_role();
 	$user->set_role($user_role);
 
@@ -332,28 +361,60 @@ function shibboleth_get_user_role() {
 
 
 /**
- * Update the user data for the specified user based on the current Shibboleth headers.
+ * Get the user fields that are managed by Shibboleth.
+ *
+ * @return Array user fields managed by Shibboleth
+ */
+function shibboleth_get_managed_user_fields() {
+	$headers = shibboleth_get_option('shibboleth_headers');
+	$managed = array();
+
+	foreach ($headers as $name => $value) {
+		if ( $value['managed'] ) {
+			$managed[] = $name;
+		}
+	}
+
+	return $managed;
+}
+
+
+/**
+ * Update the user data for the specified user based on the current Shibboleth headers.  Unless 
+ * the 'force_update' parameter is true, only the user fields marked as 'managed' fields will be 
+ * updated.
  *
  * @param int $user_id ID of the user to update
+ * @param boolean $force_update force update of user data, regardless of 'managed' flag on fields
  * @uses apply_filters() Calls 'shibboleth_user_*' before setting user attributes, 
- *       where '*' is one of: login, nicename, first_name, last_name, nickname, 
- *       display_name, email
+ *       where '*' is one of: login, nicename, first_name, last_name, 
+ *       nickname, display_name, email
  */
-function shibboleth_update_user_data($user_id) {
+function shibboleth_update_user_data($user_id, $force_update = false) {
 	require_once( ABSPATH . WPINC . '/registration.php' );
 
 	$shib_headers = shibboleth_get_option('shibboleth_headers');
 
+	$user_fields = array(
+		'user_login' => 'username',
+		'user_nicename' => 'username',
+		'first_name' => 'first_name',
+		'last_name' => 'last_name',
+		'nickname' => 'nickname',
+		'display_name' => 'display_name',
+		'user_email' => 'email'
+	);
+
 	$user_data = array(
 		'ID' => $user_id,
-		'user_login' => apply_filters('shibboleth_user_login', $_SERVER[$shib_headers['username']]),
-		'user_nicename' => apply_filters('shibboleth_user_nicename', $_SERVER[$shib_headers['username']]),
-		'first_name' => apply_filters('shibboleth_user_first_name', $_SERVER[$shib_headers['first_name']]),
-		'last_name' => apply_filters('shibboleth_user_last_name', $_SERVER[$shib_headers['last_name']]),
-		'nickname' => apply_filters('shibboleth_user_nickname', $_SERVER[$shib_headers['nickname']]),
-		'display_name' => apply_filters('shibboleth_user_display_name', $_SERVER[$shib_headers['display_name']]),
-		'user_email' => apply_filters('shibboleth_user_email', $_SERVER[$shib_headers['email']]),
 	);
+	
+	foreach ($user_fields as $field => $header) {
+		if ( $force_update || $shib_headers[$header]['managed'] ) {
+			$filter = 'shibboleth_' . ( strpos($field, 'user_') === 0 ? '' : 'user_' ) . $field;
+			$user_data[$field] = apply_filters($filter, $_SERVER[$shib_headers[$header]['name']]);
+		}
+	}
 
 	wp_update_user($user_data);
 }
