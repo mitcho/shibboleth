@@ -26,7 +26,7 @@ if ($shibboleth_plugin_revision === false || SHIBBOLETH_PLUGIN_REVISION != $shib
  * WordPress's .htaccess file.
  */
 function shibboleth_activate_plugin() {
-	if (function_exists('switch_to_blog')) switch_to_blog($GLOBALS['current_site']->blog_id);
+	if ( function_exists('switch_to_blog') ) switch_to_blog($GLOBALS['current_site']->blog_id);
 
 	shibboleth_add_option('shibboleth_login_url', get_option('home') . '/Shibboleth.sso/Login');
 	shibboleth_add_option('shibboleth_default_login', true);
@@ -62,7 +62,7 @@ function shibboleth_activate_plugin() {
 
 	shibboleth_update_option('shibboleth_plugin_revision', SHIBBOLETH_PLUGIN_REVISION);
 
-	if (function_exists('restore_current_blog')) restore_current_blog();
+	if ( function_exists('restore_current_blog') ) restore_current_blog();
 }
 register_activation_hook('shibboleth/shibboleth.php', 'shibboleth_activate_plugin');
 
@@ -77,9 +77,10 @@ register_deactivation_hook('shibboleth/shibboleth.php', 'shibboleth_deactivate_p
 
 
 /**
- * Load Shibboleth admin hooks only on admin page loads.  admin_init is 
- * actually called *after* admin_menu, so we have to hook in to the 'init' 
- * action for this.
+ * Load Shibboleth admin hooks only on admin page loads.  
+ *
+ * 'admin_init' is actually called *after* 'admin_menu', so we have to hook in 
+ * to the 'init' action for this.
  */
 function shibboleth_admin_hooks() {
 	if ( defined('WP_ADMIN') && WP_ADMIN === true ) {
@@ -91,147 +92,128 @@ add_action('init', 'shibboleth_admin_hooks');
 
 
 /**
- * Use the 'authenticate' filter if it is available (WordPress >= 2.8).
- * Otherwise, hook into 'init'.
+ * Check if a Shibboleth session is active.
+ *
+ * @return boolean if session is active
+ * @uses apply_filters calls 'shibboleth_session_active' before returning final result
  */
-if (has_filter('authenticate')) {
-	add_filter('authenticate', 'shibboleth_authenticate', 10, 3);
-} else {
-	add_action('init', 'shibboleth_wp_login');
+function shibboleth_session_active() { 
+	$active = false;
+
+	$session_headers = array('Shib-Session-ID', 'HTTP_SHIB_IDENTITY_PROVIDER');
+	foreach ($session_headers as $header) {
+		if ( array_key_exists($header, $_SERVER) && !empty($_SERVER[$header]) ) {
+			$active = true;
+			break;
+		}
+	}
+
+	$active = apply_filters('shibboleth_session_active', $active);
+	return $active;
 }
 
 
 /**
- * Authenticate the user.
+ * Authenticate the user using Shibboleth.  If a Shibboleth session is active, 
+ * use the data provided by Shibboleth to log the user in.  If a Shibboleth 
+ * session is not active, redirect the user to the Shibboleth Session Initiator 
+ * URL to initiate the session.
  */
 function shibboleth_authenticate($user, $username, $password) {
-	if (array_key_exists('loggedout', $_REQUEST) || array_key_exists('wp-submit', $_POST)) return $user;
-
-	if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
+	if ( shibboleth_session_active() ) {
 		return shibboleth_authenticate_user();
 	} else {
-		shibboleth_start_login();
+		$initiator_url = shibboleth_session_initiator_url( $_REQUEST['redirect_to'] );
+		wp_redirect($initiator_url);
+		exit;
 	}
 }
 
 
 /**
- * Process requests to wp-login.php.
+ * When wp-login.php is loaded with 'action=shibboleth', hook Shibboleth 
+ * into the WordPress authentication flow.
  */
-function shibboleth_wp_login() {
-	if ($GLOBALS['pagenow'] != 'wp-login.php') return;
-
-	switch ($_REQUEST['action']) {
-		case 'shibboleth':
-			if ($_SERVER['Shib-Session-ID'] || $_SERVER['HTTP_SHIB_IDENTITY_PROVIDER']) {
-				shibboleth_finish_login();
-			} else {
-				shibboleth_start_login();
-			}
-			break;
-
-		case 'login':
-		case '':
-			add_action('login_form', 'shibboleth_login_form');
-			break;
-
-		case 'lostpassword':
-			if (shibboleth_get_option('shibboleth_password_reset_url')) {
-				if (array_key_exists('user_login', $_REQUEST)) {
-					$user = get_userdatabylogin($_REQUEST['user_login']);
-					if (!$user) $user = get_user_by_email($_REQUEST['user_login']);
-
-					if ($user && get_usermeta($user->ID, 'shibboleth_account')) {
-						wp_redirect(shibboleth_get_option('shibboleth_password_reset_url'));
-						exit;
-					}
-				}
-			}
-			break;
-
-		default:
-			break;
-	}
+function shibboleth_login_form_shibboleth() {
+	add_filter('authenticate', 'shibboleth_authenticate', 10, 3);
 }
-
-
-function shibboleth_site_url($url, $path, $scheme) {
-	if ($path != 'wp-login.php' || $scheme == 'login_post') return $url;
-
-	// static boolean to track if we should process the URL.  This prevents 
-	// a recursive loop between this function and shibboleth_login_url()
-	static $skip = true;
-	if ($skip = (!$skip)) return $url;
-
-	$redirect_to = false;
-
-	if (shibboleth_get_option('shibboleth_default_login')) {
-		$url_parts = parse_url($url);
-		if (array_key_exists('query', $url_parts)) {
-			$query_args = parse_str($url_parts['query']);
-			if (array_key_exists('redirect_to', $query_args)) {
-				$redirect_to = $query_args['redirect_to'];
-			}
-		}
-
-		$url = shibboleth_login_url($redirect_to);
-	}
-
-	
-	return $url;
-}
-add_filter('site_url', 'shibboleth_site_url', 10, 3);
+add_action('login_form_shibboleth', 'shibboleth_login_form_shibboleth');
 
 
 /**
- * After logging out of WordPress, log user out of Shibboleth.
+ * If a Shibboleth user requests a password reset, and the Shibboleth password 
+ * reset URL is set, redirect the user there.
+ */
+function shibboleth_retrieve_password( $user_login ) {
+	$password_reset_url = shibboleth_get_option('shibboleth_password_reset_url');
+
+	if ( !empty($password_reset_url) ) {
+		$user = get_userdatabylogin($user_login);
+		if ( $user && get_usermeta($user->ID, 'shibboleth_account') ) {
+			wp_redirect($password_reset_url);
+			exit;
+		}
+	}
+}
+add_action('retrieve_password', 'shibboleth_retrieve_password');
+
+
+/**
+ * If Shibboleth is the default login method, add 'action=shibboleth' to the 
+ * WordPress login URL.
+ */
+function shibboleth_login_url($login_url) {
+	if ( shibboleth_get_option('shibboleth_default_login') ) {
+		$login_url = add_query_arg('action', 'shibboleth', $login_url);
+	}
+
+	return $login_url;
+}
+add_filter('login_url', 'shibboleth_login_url');
+
+
+/**
+ * If the Shibboleth logout URL is set and the user has an active Shibboleth 
+ * session, log the user out of Shibboleth after logging them out of WordPress.
  */
 function shibboleth_logout() {
 	$logout_url = shibboleth_get_option('shibboleth_logout_url');
-	wp_redirect($logout_url);
-	exit;
+
+	if ( !empty($logout_url) && shibboleth_session_active() ) {
+		wp_redirect($logout_url);
+		exit;
+	}
 }
 add_action('wp_logout', 'shibboleth_logout', 20);
 
 
 /**
- * Initiate Shibboleth Login by redirecting user to the Shibboleth login URL.
- */
-function shibboleth_start_login() {
-	do_action('shibboleth_start_login');
-	$login_url = shibboleth_login_url();
-	wp_redirect($login_url);
-	exit;
-}
-
-
-/**
  * Generate the URL to initiate Shibboleth login.
  *
+ * @param string $redirect the final URL to redirect the user to after all login is complete
  * @return the URL to direct the user to in order to initiate Shibboleth login
- * @uses apply_filters() Calls 'shibboleth_login_url' before returning Shibboleth login URL
+ * @uses apply_filters() Calls 'shibboleth_session_initiator_url' before returning session intiator URL
  */
-function shibboleth_login_url($redirect = false) {
+function shibboleth_session_initiator_url($redirect = null) {
 
-	// WordPress MU
-	if (function_exists('switch_to_blog')) {
-		switch_to_blog($GLOBALS['current_site']->blog_id);
-		$target = site_url('wp-login.php');
-		restore_current_blog();
-	} else {
-		$target = site_url('wp-login.php');
-	}
+	// first build the target URL.  This is the WordPress URL the user will be returned to after Shibboleth 
+	// is done, and will handle actually logging the user into WordPress using the data provdied by Shibboleth 
+	if ( function_exists('switch_to_blog') ) switch_to_blog($GLOBALS['current_site']->blog_id);
+	$target = site_url('wp-login.php');
+	if ( function_exists('restore_current_blog') ) restore_current_blog();
 
-	if (!empty($redirect)) {
+	$target = add_query_arg('action', 'shibboleth', $target);
+	if ( !empty($redirect) ) {
 		$target = add_query_arg('redirect_to', urlencode($redirect), $target);
 	}
-	$target = add_query_arg('action', 'shibboleth', $target);
 
-	$login_url = shibboleth_get_option('shibboleth_login_url');
-	$login_url = add_query_arg('target', urlencode($target), $login_url);
+	// now build the Shibboleth session initiator URL
+	$initiator_url = shibboleth_get_option('shibboleth_login_url');
+	$initiator_url = add_query_arg('target', urlencode($target), $initiator_url);
 
-	$login_url = apply_filters('shibboleth_login_url', $login_url);
-	return $login_url;
+	$initiator_url = apply_filters('shibboleth_session_initiator_url', $initiator_url);
+
+	return $initiator_url;
 }
 
 
@@ -254,26 +236,26 @@ function shibboleth_authenticate_user() {
 
 	// ensure user is authorized to login
 	$user_role = shibboleth_get_user_role();
-	if (empty($user_role)) {
+	if ( empty($user_role) ) {
 		return new WP_Error('no_access', __('You do not have sufficient access.'));
 	}
 
 	$username = $_SERVER[$shib_headers['username']];
 	$user = new WP_User($username);
 
-	if ($user->ID) {
-		if (!get_usermeta($user->ID, 'shibboleth_account')) {
+	if ( $user->ID ) {
+		if ( !get_usermeta($user->ID, 'shibboleth_account') ) {
 			// TODO: what happens if non-shibboleth account by this name already exists?
 			//return new WP_Error('invalid_username', __('Account already exists by this name.'));
 		}
 	}
 
 	// create account if new user
-	if (!$user->ID) {
+	if ( !$user->ID ) {
 		$user = shibboleth_create_new_user($username);
 	}
 
-	if (!$user->ID) {
+	if ( !$user->ID ) {
 		$error_message = 'Unable to create account based on data provided.';
 		if (defined('WP_DEBUG') && WP_DEBUG) {
 			$error_message .= '<!-- ' . print_r($_SERVER, true) . ' -->';
@@ -283,43 +265,10 @@ function shibboleth_authenticate_user() {
 
 	// update user data
 	update_usermeta($user->ID, 'shibboleth_account', true);
-	if (shibboleth_get_option('shibboleth_update_users')) shibboleth_update_user_data($user->ID);
-	if (shibboleth_get_option('shibboleth_update_roles')) $user->set_role($user_role);
+	if ( shibboleth_get_option('shibboleth_update_users') ) shibboleth_update_user_data($user->ID);
+	if ( shibboleth_get_option('shibboleth_update_roles') ) $user->set_role($user_role);
 
 	return $user;
-}
-
-
-/**
- * Finish logging a user in based on the Shibboleth headers present.
- *
- * This function is only used if the 'authenticate' filter is not present.  
- * This filter was added in WordPress 2.8, and will take care of everything 
- * shibboleth_finish_login is doing.
- *
- * @uses apply_filters() Calls 'login_redirect' before redirecting the user
- */
-function shibboleth_finish_login() {
-	$user = shibboleth_authenticate_user();
-
-	if (is_wp_error($user)) {
-		wp_die($user->get_error_message());
-	}
-
-	// log user in
-	set_current_user($user->ID);
-	wp_set_auth_cookie($user->ID, $remember);
-	do_action('wp_login', $user->user_login);
-
-	// redirect user to wherever they were going
-	$request_redirect = (isset($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : '');
-	$redirect_to = ($request_redirect ? $request_redirect : admin_url());
-	$redirect_to = apply_filters('login_redirect', $redirect_to, $request_redirect, $user);
-	if ( !$user->has_cap('edit_posts') && ( empty($redirect_to) || $redirect_to == 'wp-admin/' ) )  {
-		$redirect_to = admin_url('profile.php');
-	}
-	wp_safe_redirect($redirect_to);
-	exit();
 }
 
 
@@ -330,10 +279,10 @@ function shibboleth_finish_login() {
  * @return object WP_User object for newly created user
  */
 function shibboleth_create_new_user($user_login) {
-	if (empty($user_login)) return null;
+	if ( empty($user_login) ) return null;
 
 	// create account and flag as a shibboleth acount
-	require_once( ABSPATH . WPINC . '/registration.php');
+	require_once( ABSPATH . WPINC . '/registration.php' );
 	$user_id = wp_insert_user(array('user_login'=>$user_login));
 	$user = new WP_User($user_id);
 	update_usermeta($user->ID, 'shibboleth_account', true);
@@ -358,19 +307,19 @@ function shibboleth_create_new_user($user_login) {
  */
 function shibboleth_get_user_role() {
 	global $wp_roles;
-	if (!$wp_roles) $wp_roles = new WP_Roles();
+	if ( !$wp_roles ) $wp_roles = new WP_Roles();
 
 	$shib_roles = apply_filters('shibboleth_roles', shibboleth_get_option('shibboleth_roles'));
 	$user_role = $shib_roles['default'];
 
-	foreach ($wp_roles->role_names as $key => $name) {
+	foreach ( $wp_roles->role_names as $key => $name ) {
 		$role_header = $shib_roles[$key]['header'];
 		$role_value = $shib_roles[$key]['value'];
 
-		if (empty($role_header) || empty($role_value)) continue;
+		if ( empty($role_header) || empty($role_value) ) continue;
 
 		$values = split(';', $_SERVER[$role_header]);
-		if (in_array($role_value, $values)) {
+		if ( in_array($role_value, $values) ) {
 			$user_role = $key;
 			break;
 		}
@@ -391,7 +340,7 @@ function shibboleth_get_user_role() {
  *       display_name, email
  */
 function shibboleth_update_user_data($user_id) {
-	require_once( ABSPATH . WPINC . '/registration.php');
+	require_once( ABSPATH . WPINC . '/registration.php' );
 
 	$shib_headers = shibboleth_get_option('shibboleth_headers');
 
@@ -416,16 +365,17 @@ function shibboleth_update_user_data($user_id) {
  * deployers can style this however they choose.
  */
 function shibboleth_login_form() {
-	$login_url = shibboleth_login_url();
+	$login_url = add_query_arg('action', 'shibboleth');
 	echo '<p id="shibboleth_login"><a href="' . $login_url . '">' . __('Login with Shibboleth', 'shibboleth') . '</a></p>';
 }
+add_action('login_form', 'shibboleth_login_form');
 
 
 /**
  * Insert directives into .htaccess file to enable Shibboleth Lazy Sessions.
  */
 function shibboleth_insert_htaccess() {
-	if (got_mod_rewrite()) {
+	if ( got_mod_rewrite() ) {
 		$htaccess = get_home_path() . '.htaccess';
 		$rules = array('AuthType Shibboleth', 'Require Shibboleth');
 		insert_with_markers($htaccess, 'Shibboleth', $rules);
@@ -437,7 +387,7 @@ function shibboleth_insert_htaccess() {
  * Remove directives from .htaccess file to enable Shibboleth Lazy Sessions.
  */
 function shibboleth_remove_htaccess() {
-	if (got_mod_rewrite()) {
+	if ( got_mod_rewrite() ) {
 		$htaccess = get_home_path() . '.htaccess';
 		insert_with_markers($htaccess, 'Shibboleth', array());
 	}
@@ -468,4 +418,3 @@ function shibboleth_delete_option($key) {
 	return function_exists('delete_site_option') ? delete_site_option($key) : delete_option($key);
 }
 
-?>
