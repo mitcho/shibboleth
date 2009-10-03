@@ -1,0 +1,271 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Will Norris
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Shibboleth 1.3-dev\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/shibboleth\n"
+"POT-Creation-Date: 2009-10-02 17:48-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: options-admin.php:14 options-admin.php:83
+msgid "Shibboleth Options"
+msgstr ""
+
+#. #-#-#-#-#  shibboleth.pot (Shibboleth 1.3-dev)  #-#-#-#-#
+#. Plugin Name of an extension
+#: options-admin.php:15 options-admin.php:18
+msgid "Shibboleth"
+msgstr ""
+
+#: options-admin.php:17
+msgid "Shibboleth options"
+msgstr ""
+
+#: options-admin.php:31
+msgid "Shibboleth 1.3 Wiki"
+msgstr ""
+
+#: options-admin.php:32
+msgid "Shibboleth 2 Wiki"
+msgstr ""
+
+#: options-admin.php:33
+msgid "Shibboleth Mailing Lists"
+msgstr ""
+
+#: options-admin.php:87
+msgid "Session Initiator URL"
+msgstr ""
+
+#: options-admin.php:90
+msgid ""
+"This URL is constructed from values found in your main Shibboleth SP "
+"configuration file: your site hostname, the Sessions handlerURL, and the "
+"SessionInitiator Location."
+msgstr ""
+
+#: options-admin.php:93 options-admin.php:106 options-admin.php:147
+msgid "Wiki Documentation"
+msgstr ""
+
+#: options-admin.php:99
+msgid "Logout URL"
+msgstr ""
+
+#: options-admin.php:102
+msgid ""
+"This URL is constructed from values found in your main Shibboleth SP "
+"configuration file: your site hostname, the Sessions handlerURL, and the "
+"LogoutInitiator Location (also known as the SingleLogoutService Location in "
+"Shibboleth 1.3)."
+msgstr ""
+
+#: options-admin.php:112
+msgid "Password Change URL"
+msgstr ""
+
+#: options-admin.php:115
+msgid ""
+"If this option is set, Shibboleth users will see a \"change password\" link "
+"on their profile page directing them to this URL."
+msgstr ""
+
+#: options-admin.php:119
+msgid "Password Reset URL"
+msgstr ""
+
+#: options-admin.php:122
+msgid ""
+"If this option is set, Shibboleth users who try to reset their forgotten "
+"password using WordPress will be redirected to this URL."
+msgstr ""
+
+#: options-admin.php:126
+msgid "Shibboleth is default login"
+msgstr ""
+
+#: options-admin.php:129
+msgid "Use Shibboleth as the default login method for users."
+msgstr ""
+
+#: options-admin.php:131
+msgid ""
+"If set, this will cause all standard WordPress login links to initiate "
+"Shibboleth login instead of local WordPress authentication.  Shibboleth "
+"login can always be initiated from the WordPress login form by clicking the "
+"\"Login with Shibboleth\" link."
+msgstr ""
+
+#: options-admin.php:140
+msgid "User Profile Data"
+msgstr ""
+
+#: options-admin.php:142
+msgid ""
+"Define the Shibboleth headers which should be mapped to each user profile "
+"attribute.  These header names are configured in <code>attribute-map.xml</"
+"code> (for Shibboleth 2.x) or <code>AAP.xml</code> (for Shibboleth 1.x)."
+msgstr ""
+
+#: options-admin.php:154
+msgid "Username"
+msgstr ""
+
+#: options-admin.php:160
+msgid "First name"
+msgstr ""
+
+#: options-admin.php:164 options-admin.php:171 options-admin.php:178
+#: options-admin.php:185 options-admin.php:192
+msgid "Managed"
+msgstr ""
+
+#: options-admin.php:167
+msgid "Last name"
+msgstr ""
+
+#: options-admin.php:174
+msgid "Nickname"
+msgstr ""
+
+#: options-admin.php:181
+msgid "Display name"
+msgstr ""
+
+#: options-admin.php:188
+msgid "Email Address"
+msgstr ""
+
+#: options-admin.php:196
+msgid ""
+"<em>Managed</em> profile fields are updated each time the user logs in using "
+"the current data provided by Shibboleth.  Additionally, users will be "
+"prevented from manually updating these fields from within WordPress.  Note "
+"that Shibboleth data is always used to populate the user profile during "
+"initial account creation."
+msgstr ""
+
+#: options-admin.php:203
+msgid "User Role Mappings"
+msgstr ""
+
+#: options-admin.php:205
+msgid ""
+"Users can be placed into one of WordPress's internal roles based on any "
+"attribute.  For example, you could define a special eduPersonEntitlement "
+"value that designates the user as a WordPress Administrator.  Or you could "
+"automatically place all users with an eduPersonAffiliation of \"faculty\" in "
+"the Author role."
+msgstr ""
+
+#: options-admin.php:210
+msgid ""
+"<strong>Current Limitations:</strong> While WordPress supports users having "
+"multiple roles, the Shibboleth plugin will only place the user in the "
+"highest ranking role.  Only a single header/value pair is supported for each "
+"user role.  This may be expanded in the future to support multiple header/"
+"value pairs or regular expression values.  In the meantime, you can use the "
+"<em>shibboleth_roles</em> and <em>shibboleth_user_role</em> WordPress "
+"filters to provide your own logic for assigning user roles."
+msgstr ""
+
+#: options-admin.php:227
+msgid "Role Mappings"
+msgstr ""
+
+#: options-admin.php:236
+msgid "Header Name"
+msgstr ""
+
+#: options-admin.php:237
+msgid "Header Value"
+msgstr ""
+
+#: options-admin.php:259
+msgid "Default Role"
+msgstr ""
+
+#: options-admin.php:262
+msgid "(none)"
+msgstr ""
+
+#: options-admin.php:271
+msgid ""
+"If a user does not map into any of the roles above, they will be placed into "
+"the default role.  If there is no default role, the user will not be able to "
+"login with Shibboleth."
+msgstr ""
+
+#: options-admin.php:278
+msgid "Update User Roles"
+msgstr ""
+
+#: options-admin.php:281
+msgid ""
+"Use Shibboleth data to update user role mappings each time the user logs in."
+msgstr ""
+
+#: options-admin.php:283
+msgid ""
+"Be aware that if you use this option, you should <strong>not</strong> update "
+"user roles manually, since they will be overwritten from Shibboleth the next "
+"time the user logs in.  Note that Shibboleth data is always used to populate "
+"the initial user role during account creation."
+msgstr ""
+
+#: options-admin.php:293
+msgid "Save Changes"
+msgstr ""
+
+#: options-user.php:34
+msgid "Some profile fields cannot be changed from WordPress."
+msgstr ""
+
+#: options-user.php:73
+msgid ""
+"Starred fields are managed by Shibboleth and should not be changed from "
+"WordPress."
+msgstr ""
+
+#: options-user.php:91
+msgid "Change Password"
+msgstr ""
+
+#: options-user.php:93
+msgid "Change your password"
+msgstr ""
+
+#: shibboleth.php:269
+msgid "You do not have sufficient access."
+msgstr ""
+
+#: shibboleth.php:430
+msgid "Login with Shibboleth"
+msgstr ""
+
+#. Plugin URI of an extension
+msgid "http://wordpress.org/extend/plugins/shibboleth"
+msgstr ""
+
+#. Description of an extension
+msgid ""
+"Easily externalize user authentication to a <a href=\"http://shibboleth."
+"internet2.edu\">Shibboleth</a> Service Provider"
+msgstr ""
+
+#. Author of an extension
+msgid "Will Norris"
+msgstr ""
+
+#. Author URI of an extension
+msgid "http://willnorris.com/"
+msgstr ""

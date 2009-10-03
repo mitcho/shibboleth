@@ -45,7 +45,7 @@ function shibboleth_help_text() {
 function shibboleth_options_page() {
 	global $wp_roles;
 
-	if (isset($_POST['submit'])) {
+	if ( isset($_POST['submit']) ) {
 		check_admin_referer('shibboleth_update_options');
 
 		$shib_headers = (array) shibboleth_get_option('shibboleth_headers');
@@ -195,7 +195,7 @@ function shibboleth_options_page() {
 
 			<p><?php _e('<em>Managed</em> profile fields are updated each time the user logs in using the current'
 				. ' data provided by Shibboleth.  Additionally, users will be prevented from manually updating these'
-				. '	fields from within WordPress.  Note that Shibboleth data is always used to populate the user'
+				. ' fields from within WordPress.  Note that Shibboleth data is always used to populate the user'
 				. ' profile during initial account creation.', 'shibboleth'); ?></p>
 
 			<br class="clear" />
@@ -290,7 +290,7 @@ function shibboleth_options_page() {
 
 
 			<?php wp_nonce_field('shibboleth_update_options') ?>
-			<p class="submit"><input type="submit" name="submit" value="<?php _e('Update Options') ?>" /></p>
+			<p class="submit"><input type="submit" name="submit" class="button-primary" value="<?php _e('Save Changes') ?>" /></p>
 		</form>
 	</div>
 
