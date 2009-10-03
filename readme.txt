@@ -104,10 +104,11 @@ have to make that call as to what is most appropriate.
 
 == Changelog ==
 
-= version 1.3 (TBD) = 
+= version 1.3 (2009-10-02) = 
  - required WordPress version bumped to 2.8
  - much cleaner integration with WordPress authentication system
  - individual user profile fields can be designated as managed by Shibboleth
+ - start of support for i18n.  If anyone is willing to provide translations, please contact the plugin author
 
 = version 1.2 (2009-04-21) =
  - fix bug where shibboleth users couldn't update their profile. (props pchapman on bug report)

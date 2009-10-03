@@ -29,7 +29,7 @@ function shibboleth_activate_plugin() {
 	if ( function_exists('switch_to_blog') ) switch_to_blog($GLOBALS['current_site']->blog_id);
 
 	shibboleth_add_option('shibboleth_login_url', get_option('home') . '/Shibboleth.sso/Login');
-	shibboleth_add_option('shibboleth_default_login', true);
+	shibboleth_add_option('shibboleth_default_login', false);
 	shibboleth_add_option('shibboleth_logout_url', get_option('home') . '/Shibboleth.sso/Logout');
 
 	$headers = array(
