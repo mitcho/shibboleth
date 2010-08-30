@@ -32,8 +32,9 @@ function shibboleth_help_text() {
 		<li><a href="https://spaces.internet2.edu/display/SHIB2/" target="_blank">' . __('Shibboleth 2 Wiki', 'shibboleth') . '</a></li>
 		<li><a href="http://shibboleth.internet2.edu/lists.html" target="_blank">' . __('Shibboleth Mailing Lists', 'shibboleth') . '</a></li>
 	</ul>';
+	
+	return apply_filters( 'shibboleth_help_text_filter', $text );
 
-	return $text;
 }
 
 
@@ -50,10 +51,24 @@ function shibboleth_options_page() {
 
 		$shib_headers = (array) shibboleth_get_option('shibboleth_headers');
 		$shib_headers = array_merge($shib_headers, $_POST['headers']);
+		/**
+		 * filter shibboleth_form_submit_headers
+		 * @param $shib_headers array
+		 * @since 1.4
+		 * Hint: access $_POST within the filter.
+		 */
+		$shib_headers = apply_filters( 'shibboleth_form_submit_headers', $shib_headers );
 		shibboleth_update_option('shibboleth_headers', $shib_headers);
 
 		$shib_roles = (array) shibboleth_get_option('shibboleth_roles');
 		$shib_roles = array_merge($shib_roles, $_POST['shibboleth_roles']);
+		/**
+		 * filter shibboleth_form_submit_roles
+		 * @param $shib_roles array
+		 * @since 1.4
+		 * Hint: access $_POST within the filter.
+		 */
+		$shib_roles = apply_filters( 'shibboleth_form_submit_roles', $shib_roles );
 		shibboleth_update_option('shibboleth_roles', $shib_roles);
 
 		shibboleth_update_option('shibboleth_login_url', $_POST['login_url']);
@@ -63,6 +78,13 @@ function shibboleth_options_page() {
 		shibboleth_update_option('shibboleth_default_login', (boolean) $_POST['default_login']);
 		shibboleth_update_option('shibboleth_update_users', (boolean) $_POST['update_users']);
 		shibboleth_update_option('shibboleth_update_roles', (boolean) $_POST['update_roles']);
+		
+		/**
+		 * action shibboleth_form_submit
+		 * @since 1.4
+		 * Hint: use global $_POST within the action.
+		 */
+		do_action( 'shibboleth_form_submit' );
 	}
 
 	$shib_headers = shibboleth_get_option('shibboleth_headers');
@@ -133,6 +155,18 @@ function shibboleth_options_page() {
 							. ' initiated from the WordPress login form by clicking the "Login with Shibboleth" link.', 'shibboleth'); ?></p>
 					</td>
 				</tr>
+<?php
+	/**
+	 * action shibboleth_options_table
+	 * Add your own Shibboleth options items to the Shibboleth options table.
+	 * Note: This is in a <table> so add a <tr> with appropriate styling.
+	 * 
+	 * @param $shib_headers array
+	 * @param $shib_roles array
+	 * @since 1.4
+	 */
+	do_action( 'shibboleth_options_table', $shib_headers, $shib_roles );
+?>
 			</table>
 
 			<br class="clear" />
@@ -161,35 +195,35 @@ function shibboleth_options_page() {
 					<td><input type="text" id="first_name" name="headers[first_name][name]" value="<?php echo 
 						$shib_headers['first_name']['name'] ?>" /></td>
 					<td><input type="checkbox" id="first_name_managed" name="headers[first_name][managed]" <?php 
-						checked($shib_headers['first_name']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
+						checked($shib_headers['first_name']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="last_name"><?php _e('Last name') ?></label</th>
 					<td><input type="text" id="last_name" name="headers[last_name][name]" value="<?php echo 
 						$shib_headers['last_name']['name'] ?>" /></td>
 					<td><input type="checkbox" id="last_name_managed" name="headers[last_name][managed]" <?php 
-						checked($shib_headers['last_name']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
+						checked($shib_headers['last_name']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="nickname"><?php _e('Nickname') ?></label</th>
 					<td><input type="text" id="nickname" name="headers[nickname][name]" value="<?php echo 
 						$shib_headers['nickname']['name'] ?>" /></td>
 					<td><input type="checkbox" id="nickname_managed" name="headers[nickname][managed]" <?php 
-						checked($shib_headers['nickname']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
+						checked($shib_headers['nickname']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="_display_name"><?php _e('Display name', 'shibboleth') ?></label</th>
 					<td><input type="text" id="_display_name" name="headers[display_name][name]" value="<?php echo 
 						$shib_headers['display_name']['name'] ?>" /></td>
 					<td><input type="checkbox" id="display_name_managed" name="headers[display_name][managed]" <?php 
-						checked($shib_headers['display_name']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
+						checked($shib_headers['display_name']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="email"><?php _e('Email Address', 'shibboleth') ?></label</th>
 					<td><input type="text" id="email" name="headers[email][name]" value="<?php echo 
 						$shib_headers['email']['name'] ?>" /></td>
 					<td><input type="checkbox" id="email_managed" name="headers[email][managed]" <?php 
-						checked($shib_headers['email']['managed']) ?> /> <?php _e('Managed', 'shibboleth') ?></td>
+						checked($shib_headers['email']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 			</table>
 
@@ -201,6 +235,20 @@ function shibboleth_options_page() {
 			<br class="clear" />
 
 			<h3><?php _e('User Role Mappings', 'shibboleth') ?></h3>
+
+<?php
+/**
+ * filter shibboleth_role_mapping_override
+ * Return true to override the default user role mapping form
+ * 
+ * @param boolean - default value false
+ * @return boolean - true if override
+ * @since 1.4
+ * 
+ * Use in conjunction with shibboleth_role_mapping_form action below
+ */
+if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
+?>
 
 			<p><?php _e('Users can be placed into one of WordPress\'s internal roles based on any'
 				. ' attribute.  For example, you could define a special eduPersonEntitlement value'
@@ -288,6 +336,21 @@ function shibboleth_options_page() {
 				</tr>
 			</table>
 
+<?php
+else: 
+	/**
+	 * action shibboleth_role_mapping_form
+	 * Roll your own custom Shibboleth role mapping admin UI
+	 * 
+	 * @param $shib_headers array
+	 * @param $shib_roles array
+	 * @since 1.4
+	 * 
+	 * Use in conjunction with shibboleth_role_mapping_override filter
+	 */
+	do_action( 'shibboleth_role_mapping_form', $shib_headers, $shib_roles );
+endif; // if ( form override )
+?>
 
 			<?php wp_nonce_field('shibboleth_update_options') ?>
 			<p class="submit"><input type="submit" name="submit" class="button-primary" value="<?php _e('Save Changes') ?>" /></p>

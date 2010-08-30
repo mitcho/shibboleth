@@ -1,8 +1,8 @@
 === Shibboleth ===
-Contributors: willnorris 
+Contributors: willnorris, mitchoyoshitaka
 Tags: shibboleth, authentication, login, saml
 Requires at least: 2.8
-Tested up to: 2.8.4
+Tested up to: 3.0.1
 Stable tag: 1.3
 
 Allows WordPress to externalize user authentication and account creation to a
@@ -81,7 +81,7 @@ be used to extend the functionality of the plugin.  Search `shibboleth.php` for
 occurances of the function calls `apply_filters` and `do_action` to find them
 all.  Then [write a new plugin][] that makes use of the hooks.  If your require
 additional hooks to allow for extending other parts of the plugin, please
-notify the [plugin author][].
+notify the plugin authors via the [support forum][].
 
 Before extending the plugin in this manner, please ensure that it is not
 actually more appropriate to add this logic to Shibboleth.  It may make more
@@ -94,7 +94,7 @@ have to make that call as to what is most appropriate.
 [actions]: http://codex.wordpress.org/Plugin_API#Actions
 [filters]: http://codex.wordpress.org/Plugin_API#Filters
 [write a new plugin]: http://codex.wordpress.org/Writing_a_Plugin
-[plugin author]: http://willnorris.com/
+[support forum]: http://wordpress.org/tags/shibboleth?forum_id=10#postform
 
 == Screenshots ==
 
@@ -103,6 +103,11 @@ have to make that call as to what is most appropriate.
 3. Assign users into WordPress roles based on arbitrary data provided by Shibboleth
 
 == Changelog ==
+
+= version 1.4 (2010-08-30) =
+ - tested for compatibility with WordPress 3.0
+ - new hooks for developers to override the default user role mapping controls
+ - now applies `sanitize_name()` to the Shibboleth user's `nicename` column
 
 = version 1.3 (2009-10-02) = 
  - required WordPress version bumped to 2.8

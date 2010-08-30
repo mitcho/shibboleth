@@ -3,9 +3,8 @@
  Plugin Name: Shibboleth
  Plugin URI: http://wordpress.org/extend/plugins/shibboleth
  Description: Easily externalize user authentication to a <a href="http://shibboleth.internet2.edu">Shibboleth</a> Service Provider
- Author: Will Norris
- Author URI: http://willnorris.com/
- Version: 1.4-dev
+ Author: Will Norris, mitcho (Michael 芳貴 Erlewine)
+ Version: 1.4
  License: Apache 2 (http://www.apache.org/licenses/LICENSE-2.0.html)
  */
 
@@ -265,6 +264,7 @@ function shibboleth_authenticate_user() {
 
 	// ensure user is authorized to login
 	$user_role = shibboleth_get_user_role();
+
 	if ( empty($user_role) ) {
 		return new WP_Error('no_access', __('You do not have sufficient access.'));
 	}
@@ -295,7 +295,10 @@ function shibboleth_authenticate_user() {
 	// update user data
 	update_usermeta($user->ID, 'shibboleth_account', true);
 	shibboleth_update_user_data($user->ID);
-	if ( shibboleth_get_option('shibboleth_update_roles') ) $user->set_role($user_role);
+	if ( shibboleth_get_option('shibboleth_update_roles') ) {
+		$user->set_role($user_role);
+		do_action( 'shibboleth_set_user_roles', $user );
+	}
 
 	return $user;
 }
@@ -320,6 +323,7 @@ function shibboleth_create_new_user($user_login) {
 	shibboleth_update_user_data($user->ID, true);
 	$user_role = shibboleth_get_user_role();
 	$user->set_role($user_role);
+	do_action( 'shibboleth_set_user_roles', $user );
 
 	return $user;
 }
@@ -419,6 +423,14 @@ function shibboleth_update_user_data($user_id, $force_update = false) {
 	wp_update_user($user_data);
 }
 
+
+/**
+ * Sanitize the nicename using sanitize_user
+ * See discussion: http://wordpress.org/support/topic/377030
+ * 
+ * @since 1.4
+ */
+add_filter( 'shibboleth_user_nicename', 'sanitize_user' );
 
 /**
  * Add a "Login with Shibboleth" link to the WordPress login form.  This link 
