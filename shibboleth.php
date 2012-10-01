@@ -128,7 +128,7 @@ add_action('init', 'shibboleth_admin_hooks');
 function shibboleth_session_active() { 
 	$active = false;
 
-	$session_headers = array('Shib-Session-ID', 'HTTP_SHIB_IDENTITY_PROVIDER');
+	$session_headers = array('Shib-Session-ID', 'Shib_Session_ID', 'HTTP_SHIB_IDENTITY_PROVIDER');
 	foreach ($session_headers as $header) {
 		if ( array_key_exists($header, $_SERVER) && !empty($_SERVER[$header]) ) {
 			$active = true;
