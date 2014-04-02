@@ -1,7 +1,8 @@
 <?php
 // functions for managing Shibboleth options through the WordPress administration panel
 
-add_action('admin_menu', 'shibboleth_admin_panels');
+if ( current_user_can('administrator') )
+	add_action('admin_menu', 'shibboleth_admin_panels');
 
 /**
  * Setup admin menus for Shibboleth options.
@@ -76,6 +77,7 @@ function shibboleth_options_page() {
 		shibboleth_update_option('shibboleth_password_change_url', $_POST['password_change_url']);
 		shibboleth_update_option('shibboleth_password_reset_url', $_POST['password_reset_url']);
 		shibboleth_update_option('shibboleth_default_login', (boolean) $_POST['default_login']);
+		shibboleth_update_option('shibboleth_auto_login', (boolean) $_POST['auto_login']);
 		shibboleth_update_option('shibboleth_update_users', (boolean) $_POST['update_users']);
 		shibboleth_update_option('shibboleth_update_roles', (boolean) $_POST['update_roles']);
 		
@@ -153,6 +155,16 @@ function shibboleth_options_page() {
 						<p><?php _e('If set, this will cause all standard WordPress login links to initiate Shibboleth'
 							. ' login instead of local WordPress authentication.  Shibboleth login can always be'
 							. ' initiated from the WordPress login form by clicking the "Login with Shibboleth" link.', 'shibboleth'); ?></p>
+					</td>
+				</tr>
+				<tr>
+				<th scope="row"><label for="auto_login"><?php _e('Shibboleth automatic login', 'shibboleth') ?></label></th>
+					<td>
+						<input type="checkbox" id="auto_login" name="auto_login" <?php echo shibboleth_get_option('shibboleth_auto_login') ? ' checked="checked"' : '' ?> />
+						<label for="auto_login"><?php _e('Use Shibboleth to auto-login users.', 'shibboleth'); ?></label>
+
+						<p><?php _e('If set, this will force a wp_signon() call and wp_safe_redirect()'
+							. ' to the site_url option.' , 'shibboleth'); ?></p>
 					</td>
 				</tr>
 <?php

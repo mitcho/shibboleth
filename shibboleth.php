@@ -18,6 +18,25 @@ if ($shibboleth_plugin_revision === false || SHIBBOLETH_PLUGIN_REVISION != $shib
 	add_action('admin_init', 'shibboleth_activate_plugin');
 }
 
+/**
+ * Perform automatic login. This is based on the user not being logged in,
+ * an active session and the option being set to true.
+ */
+function shibboleth_auto_login() {
+	$shibboleth_auto_login = shibboleth_get_option('shibboleth_auto_login');
+	if ( !is_user_logged_in() && shibboleth_session_active() && $shibboleth_auto_login ) {
+		do_action('login_form_shibboleth');
+
+		$userobj = wp_signon('', true);
+		if ( is_wp_error($userobj) ) {
+			// TODO: Proper error return.
+		} else {
+			wp_safe_redirect($_SERVER['REQUEST_URI']);
+			exit();
+		}
+	}
+}
+add_action('init', 'shibboleth_auto_login');
 
 /**
  * Activate the plugin.  This registers default values for all of the 
@@ -29,6 +48,7 @@ function shibboleth_activate_plugin() {
 
 	shibboleth_add_option('shibboleth_login_url', get_option('home') . '/Shibboleth.sso/Login');
 	shibboleth_add_option('shibboleth_default_login', false);
+	shibboleth_add_option('shibboleth_auto_login', false);
 	shibboleth_add_option('shibboleth_logout_url', get_option('home') . '/Shibboleth.sso/Logout');
 
 	$headers = array(
