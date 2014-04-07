@@ -31,6 +31,13 @@ access to WordPress altogether using a special eduPersonEntitlement value.
 
 [Shibboleth]: http://shibboleth.internet2.edu/
 
+= Contribute on GitHub =
+
+This plugin is actively maintained by the community, [using 
+GitHub](https://github.com/mitcho/shibboleth). Please submit issues and
+contribute changes, via pull request, [on 
+GitHub](https://github.com/mitcho/shibboleth).
+
 == Installation ==
 
 First and foremost, you must have the Shibboleth Service Provider [properly
@@ -141,7 +148,7 @@ have to make that call as to what is most appropriate.
  - tested for compatibility with recent WordPress versions; now requires WordPress 3.3
  - options screen now limited to admins; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
  - new option to auto-login using Shibboleth; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
- - remove workaround for MU `add_site_option`; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
+ - remove workaround for MU `add_site_option`; [props billjojo](https://github.com/mitcho/shibboleth/pull/2)
 
 = version 1.5 (2012-10-01) =
  - [Bugfix](http://wordpress.org/support/topic/plugin-shibboleth-loop-wrong-key-checked): check for `Shib_Session_ID` as well as `Shib-Session-ID` out of the box. Props David Smith
