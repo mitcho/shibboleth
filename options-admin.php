@@ -1,7 +1,7 @@
 <?php
 // functions for managing Shibboleth options through the WordPress administration panel
 
-if ( current_user_can('administrator') )
+if ( current_user_can('manage_options') )
 	add_action('admin_menu', 'shibboleth_admin_panels');
 
 /**
