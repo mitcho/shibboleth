@@ -493,12 +493,6 @@ function shibboleth_get_option($key, $default = false ) {
 }
 function shibboleth_add_option($key, $value, $autoload = 'yes') {
 	if (function_exists('add_site_option')) {
-		// WordPress MU's add_site_option() is totally broken, in that it simply calls site_update_option()
-		// if a value exists instead of leaving it alone like add_option() does.
-		global $wpdb;
-		$row = $wpdb->get_row( $wpdb->prepare("SELECT meta_value FROM $wpdb->sitemeta WHERE meta_key = %s AND site_id = %d", $key, $wpdb->siteid) );
-		if ($row !== null) return false;
-
 		return add_site_option($key, $value);
 	} else {
 		return add_option($key, $value, '', $autoload);
