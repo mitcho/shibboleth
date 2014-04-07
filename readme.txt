@@ -1,8 +1,8 @@
 === Shibboleth ===
 Contributors: willnorris, mitchoyoshitaka
 Tags: shibboleth, authentication, login, saml
-Requires at least: 2.8
-Tested up to: 3.8.1
+Requires at least: 3.3
+Tested up to: 3.9
 Stable tag: 1.4
 
 Allows WordPress to externalize user authentication and account creation to a
@@ -34,7 +34,7 @@ access to WordPress altogether using a special eduPersonEntitlement value.
 == Installation ==
 
 First and foremost, you must have the Shibboleth Service Provider [properly
-installed] and working.  If you don't have Shibboleth working yet, I assure
+installed][] and working.  If you don't have Shibboleth working yet, I assure
 you that you won't get this plugin to work.  This plugin expects Shibboleth to
 be configured to use "lazy sessions", so ensure that you have Shibboleth
 configured with requireSession set to "false".  Upon activation, the plugin
@@ -47,7 +47,7 @@ If it is unable to do so, you can add this manually:
 The option to automatically login the users into WordPress also works when not
 using the lazy session options as it will force login into WordPress. In other
 words, if the user has an active session and you are requiring authentication
-to access this WordPress site and they need to be logged into Wordpress, then
+to access this WordPress site and they need to be logged into WordPress, then
 they will be logged in without having to use the WordPress login page. 
 
 This works very well for sites that use WordPress for internal ticketing and
@@ -138,9 +138,10 @@ have to make that call as to what is most appropriate.
 == Changelog ==
 
 = version 1.6 =
- - tested for compatibility with recent WordPress versions
+ - tested for compatibility with recent WordPress versions; now requires WordPress 3.3
  - options screen now limited to admins; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
  - new option to auto-login using Shibboleth; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
+ - remove workaround for MU `add_site_option`; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
 
 = version 1.5 (2012-10-01) =
  - [Bugfix](http://wordpress.org/support/topic/plugin-shibboleth-loop-wrong-key-checked): check for `Shib_Session_ID` as well as `Shib-Session-ID` out of the box. Props David Smith
