@@ -3,7 +3,7 @@ Contributors: willnorris, mitchoyoshitaka
 Tags: shibboleth, authentication, login, saml
 Requires at least: 3.3
 Tested up to: 3.9
-Stable tag: 1.4
+Stable tag: 1.6
 
 Allows WordPress to externalize user authentication and account creation to a
 Shibboleth Service Provider.
@@ -34,9 +34,9 @@ access to WordPress altogether using a special eduPersonEntitlement value.
 = Contribute on GitHub =
 
 This plugin is actively maintained by the community, [using 
-GitHub](https://github.com/mitcho/shibboleth). Please submit issues and
-contribute changes, via pull request, [on 
-GitHub](https://github.com/mitcho/shibboleth).
+GitHub](https://github.com/mitcho/shibboleth). Contributions are welcome, via
+pull request, [on GitHub](https://github.com/mitcho/shibboleth). Issues can be
+submitted [on the issue tracker](https://github.com/mitcho/shibboleth/issues).
 
 == Installation ==
 
@@ -144,7 +144,7 @@ have to make that call as to what is most appropriate.
 
 == Changelog ==
 
-= version 1.6 =
+= version 1.6 (2014-04-07) =
  - tested for compatibility with recent WordPress versions; now requires WordPress 3.3
  - options screen now limited to admins; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
  - new option to auto-login using Shibboleth; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
