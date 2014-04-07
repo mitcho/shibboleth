@@ -2,7 +2,7 @@
 Contributors: willnorris, mitchoyoshitaka
 Tags: shibboleth, authentication, login, saml
 Requires at least: 2.8
-Tested up to: 3.5
+Tested up to: 3.8.1
 Stable tag: 1.4
 
 Allows WordPress to externalize user authentication and account creation to a
@@ -103,6 +103,11 @@ have to make that call as to what is most appropriate.
 3. Assign users into WordPress roles based on arbitrary data provided by Shibboleth
 
 == Changelog ==
+
+= version 1.6 =
+ - tested for compatibility with recent WordPress versions
+ - options screen now limited to admins; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
+ - new option to auto-login using Shibboleth; [props billjojo](https://github.com/mitcho/shibboleth/pull/1)
 
 = version 1.5 (2012-10-01) =
  - [Bugfix](http://wordpress.org/support/topic/plugin-shibboleth-loop-wrong-key-checked): check for `Shib_Session_ID` as well as `Shib-Session-ID` out of the box. Props David Smith
