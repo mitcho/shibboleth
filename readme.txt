@@ -63,13 +63,13 @@ Consider the following .htaccess options when used in conjunction with the
 automatic login feature
 
     AuthType shibboleth
-    ShibRequireSession on
+    ShibRequestSetting requireSession 1
     Require valid-user
 
 OR
 
     Authtype shibboleth
-    ShibRequireSession on
+    ShibRequestSetting requireSession 1
     Require isMemberOf group1 group2
     Require sAMAccountName user1 user 2
 
