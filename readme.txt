@@ -48,8 +48,8 @@ configured with requireSession set to "false".  Upon activation, the plugin
 will attempt to set the appropriate directives in WordPress's .htaccess file.
 If it is unable to do so, you can add this manually:
 
-    AuthType Shibboleth
-    Require Shibboleth
+    AuthType shibboleth
+    Require shibboleth
 
 The option to automatically login the users into WordPress also works when not
 using the lazy session options as it will force login into WordPress. In other
@@ -62,14 +62,14 @@ helpdesk functions where any access to content requires authentication.
 Consider the following .htaccess options when used in conjunction with the
 automatic login feature
 
-    AuthType Shibboleth
-    ShibRequireSession on
+    AuthType shibboleth
+    ShibRequestSetting requireSession 1
     Require valid-user
 
 OR
 
-    Authtype Shibboleth
-    ShibRequireSession on
+    Authtype shibboleth
+    ShibRequestSetting requireSession 1
     Require isMemberOf group1 group2
     Require sAMAccountName user1 user 2
 
