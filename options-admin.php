@@ -1,8 +1,11 @@
 <?php
 // functions for managing Shibboleth options through the WordPress administration panel
 
-if ( current_user_can('manage_options') )
+if ( is_multisite() ) {
+	add_action('network_admin_menu', 'shibboleth_network_admin_panels');
+} else {
 	add_action('admin_menu', 'shibboleth_admin_panels');
+}
 
 /**
  * Setup admin menus for Shibboleth options.
@@ -10,15 +13,19 @@ if ( current_user_can('manage_options') )
  * @action: admin_menu
  **/
 function shibboleth_admin_panels() {
-	// global options page
-	if ( function_exists('is_site_admin') ) {
-		$hookname = add_submenu_page('wpmu-admin.php', __('Shibboleth Options', 'shibboleth'), 
-			__('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
-	} else {
-		$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), 
-			__('Shibboleth', 'shibboleth'), 8, 'shibboleth-options', 'shibboleth_options_page' );
-	}
+	$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), 
+		__('Shibboleth', 'shibboleth'), 'manage_options', 'shibboleth-options', 'shibboleth_options_page' );
+	add_contextual_help($hookname, shibboleth_help_text());
+}
 
+/**
+ * Setup multisite admin menus for Shibboleth options.
+ *
+ * @action: network_admin_menu
+ **/
+function shibboleth_network_admin_panels() {
+	$hookname = add_submenu_page('settings.php', __('Shibboleth options', 'shibboleth'), 
+		__('Shibboleth', 'shibboleth'), 'manage_network_options', 'shibboleth-options', 'shibboleth_options_page' );
 	add_contextual_help($hookname, shibboleth_help_text());
 }
 
