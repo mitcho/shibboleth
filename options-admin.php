@@ -322,7 +322,7 @@ if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
 					foreach ($wp_roles->role_names as $key => $name) {
 						echo'
 						<tr valign="top">
-							<th scope="row">' . _c($name) . '</th>
+							<th scope="row">' . _x($name) . '</th>
 							<td><input type="text" id="role_'.$key.'_header" name="shibboleth_roles['.$key.'][header]" value="' . @$shib_roles[$key]['header'] . '" style="width: 100%" /></td>
 							<td><input type="text" id="role_'.$key.'_value" name="shibboleth_roles['.$key.'][value]" value="' . @$shib_roles[$key]['value'] . '" style="width: 100%" /></td>
 						</tr>';
@@ -342,7 +342,7 @@ if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
 <?php
 			foreach ($wp_roles->role_names as $key => $name) {
 				echo '
-						<option value="' . $key . '"' . ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>' . _c($name) . '</option>';
+						<option value="' . $key . '"' . ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>' . _x($name) . '</option>';
 			}
 ?>
 						</select>
