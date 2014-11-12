@@ -20,7 +20,7 @@ function shibboleth_admin_panels() {
 	$screen->add_help_tab(array(
 		'title' => 'Shibboleth Help',
 		'id' => 'shibboleth-help',
-		'callback' => 'shibboleth_help_text',
+		'content' => shibboleth_help_text(),
 	));
 }
 
@@ -37,7 +37,7 @@ function shibboleth_network_admin_panels() {
 	$screen->add_help_tab(array(
 		'title' => 'Shibboleth Help',
 		'id' => 'shibboleth-help',
-		'callback' => 'shibboleth_help_text',
+		'content' => shibboleth_help_text(),
 	));
 }
 
@@ -322,7 +322,7 @@ if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
 					foreach ($wp_roles->role_names as $key => $name) {
 						echo'
 						<tr valign="top">
-							<th scope="row">' . _x($name) . '</th>
+							<th scope="row">' . __($name) . '</th>
 							<td><input type="text" id="role_'.$key.'_header" name="shibboleth_roles['.$key.'][header]" value="' . @$shib_roles[$key]['header'] . '" style="width: 100%" /></td>
 							<td><input type="text" id="role_'.$key.'_value" name="shibboleth_roles['.$key.'][value]" value="' . @$shib_roles[$key]['value'] . '" style="width: 100%" /></td>
 						</tr>';
@@ -342,7 +342,7 @@ if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
 <?php
 			foreach ($wp_roles->role_names as $key => $name) {
 				echo '
-						<option value="' . $key . '"' . ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>' . _x($name) . '</option>';
+						<option value="' . $key . '"' . ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>' . __($name) . '</option>';
 			}
 ?>
 						</select>
