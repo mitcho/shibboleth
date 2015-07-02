@@ -1,8 +1,8 @@
 === Shibboleth ===
-Contributors: willnorris, mitchoyoshitaka
+Contributors: willnorris, mitchoyoshitaka, cjbrabec
 Tags: shibboleth, authentication, login, saml
 Requires at least: 3.3
-Tested up to: 3.9
+Tested up to: 4.2
 Stable tag: 1.6
 
 Allows WordPress to externalize user authentication and account creation to a
