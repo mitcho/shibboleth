@@ -23,12 +23,18 @@ if ($shibboleth_plugin_revision === false || SHIBBOLETH_PLUGIN_REVISION != $shib
  * REDIRECT_ environment variables automatically.
  */
 function shibboleth_getenv( $var ) {
-    if (getenv($var)) return getenv($var);
-    if (getenv('REDIRECT_'.$var)) return getenv('REDIRECT_'.$var);
-    // httpd can rewrite vars on redirects, this is the most common case
-    $var = preg_replace('/-/','_',$var);
-    if (getenv($var)) return getenv($var);
-    if (getenv('REDIRECT_'.$var)) return getenv('REDIRECT_'.$var);
+    $var_under = str_replace('-', '_', $var);
+    $check_vars = array(
+        $var => TRUE,
+        'REDIRECT_' . $var => TRUE,
+        $var_under => TRUE,
+        'REDIRECT_' . $var_under => TRUE,
+    );
+    foreach ($check_vars as $check_var => $true) {
+        if ( ($result = getenv($check_var)) !== FALSE ) {
+            return $result;
+        }
+    }
     return FALSE;
 }
 
@@ -385,7 +391,7 @@ function shibboleth_get_user_role() {
 
 		if ( empty($role_header) || empty($role_value) ) continue;
 
-		$values = split(';', shibboleth_getenv($role_header));
+		$values = explode(';', shibboleth_getenv($role_header));
 		if ( in_array($role_value, $values) ) {
 			$user_role = $key;
 			break;
