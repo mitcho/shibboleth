@@ -39,6 +39,32 @@ function shibboleth_auto_login() {
 add_action('init', 'shibboleth_auto_login');
 
 /**
+ * Private content redirects inside of WordPress prior to init.
+ * This function allows for private pages or posts to redirect through Shibboleth for subscribers.
+ */
+function shibboleth_private_status_redirect() {
+        if(shibboleth_get_option('shibboleth_private_redirect')) {
+                $pg = get_page_by_path($_SERVER['REQUEST_URI']);
+                if(!$pg) {
+                        $pg = get_page_by_path(basename(untrailingslashit($_SERVER['REQUEST_URI'])), OBJECT, 'post');
+                }
+                if($pg) {
+                        $status = get_post_status($pg->ID);
+                        if("private" == $status && !is_user_logged_in()) {
+                                $target = "/wp-login.php";
+                                $target = add_query_arg("action", "shibboleth", $target);
+                                $target = add_query_arg("redirect_to", urlencode($_SERVER["REQUEST_URI"]), $target);
+                                wp_safe_redirect($target);
+                                exit();
+                        }
+                }
+        }
+}
+
+add_action('get_header', 'shibboleth_private_status_redirect');
+
+
+/**
  * Activate the plugin.  This registers default values for all of the 
  * Shibboleth options and attempts to add the appropriate mod_rewrite rules to 
  * WordPress's .htaccess file.
