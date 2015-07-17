@@ -44,10 +44,7 @@ add_action('init', 'shibboleth_auto_login');
  */
 function shibboleth_private_status_redirect() {
         if(shibboleth_get_option('shibboleth_private_redirect')) {
-                $pg = get_page_by_path($_SERVER['REQUEST_URI']);
-                if(!$pg) {
-                        $pg = get_page_by_path(basename(untrailingslashit($_SERVER['REQUEST_URI'])), OBJECT, 'post');
-                }
+                $pg = get_page_by_path(basename(untrailingslashit($_SERVER['REQUEST_URI'])), OBJECT, array("page", "post"));
                 if($pg) {
                         $status = get_post_status($pg->ID);
                         if("private" == $status && !is_user_logged_in()) {
