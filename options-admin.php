@@ -154,14 +154,13 @@ function shibboleth_options_page() {
 						<?php _e('If this option is set, Shibboleth users who try to reset their forgotten password using WordPress will be redirected to this URL.', 'shibboleth') ?>
 					</td>
 				</tr>
-				<tr>
-                                	<th scope="row"><label for="private_redirect"><?php _e('Redirect Private Pages/Posts', 'shibboleth') ?></label></th>
+				 <tr>
+                                <th scope="row"><label for="private_redirect"><?php _e('Redirect Private Pages/Posts', 'shibboleth') ?></label></th>
                                         <td>
                                                 <input type="checkbox" id="private_redirect" name="private_redirect" <?php echo shibboleth_get_option('shibboleth_private_redirect') ? ' checked="checked"' : '' ?> />
-                                                <label for="private_redirect"><?php _e('Allow private pages and posts to be accessed if logged in through Shibboleth.', 'shibboleth'); ?></label>
+                                                <label for="private_redirect"><?php _e('Allow private post types to be redirected through Shibboleth.', 'shibboleth'); ?></label>
 
-                                                <p><?php _e('If set, this will cause all private pages and posts to be accessible to subscribers'
-                                                        . ' if they are logged in via Shibboleth.', 'shibboleth'); ?></p>
+                                                <p><?php _e('If a user is not logged in and tries to access a private post type, redirect them to the shibboleth login.', 'shibboleth'); ?></p>
                                         </td>
                                 </tr>
 				<tr>
