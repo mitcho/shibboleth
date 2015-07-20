@@ -246,7 +246,10 @@ function shibboleth_session_initiator_url($redirect = null) {
 
 	// first build the target URL.  This is the WordPress URL the user will be returned to after Shibboleth 
 	// is done, and will handle actually logging the user into WordPress using the data provdied by Shibboleth 
-	if ( function_exists('switch_to_blog') ) switch_to_blog($GLOBALS['current_site']->blog_id);
+	if ( function_exists('switch_to_blog') ) {
+		if ( is_multisite() ) switch_to_blog($GLOBALS['current_blog']->blog_id);
+		else switch_to_blog($GLOBALS['current_site']->blog_id);
+	}
 	$target = site_url('wp-login.php');
 	if ( function_exists('restore_current_blog') ) restore_current_blog();
 
