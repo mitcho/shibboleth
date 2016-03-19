@@ -460,7 +460,7 @@ add_filter( 'shibboleth_user_nicename', 'sanitize_user' );
 function shibboleth_login_form() {
 	$login_url = add_query_arg('action', 'shibboleth');
 	$login_url = remove_query_arg('reauth', $login_url);
-	echo '<p id="shibboleth_login"><a href="' . $login_url . '">' . __('Login with Shibboleth', 'shibboleth') . '</a></p>';
+	echo '<p id="shibboleth_login"><a href="' . esc_url($login_url) . '">' . __('Login with Shibboleth', 'shibboleth') . '</a></p>';
 }
 add_action('login_form', 'shibboleth_login_form');
 
