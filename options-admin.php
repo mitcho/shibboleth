@@ -13,9 +13,15 @@ if ( is_multisite() ) {
  * @action: admin_menu
  **/
 function shibboleth_admin_panels() {
-	$hookname = add_options_page(__('Shibboleth options', 'shibboleth'), 
+	$hookname = add_options_page(__('Shibboleth options', 'shibboleth'),
 		__('Shibboleth', 'shibboleth'), 'manage_options', 'shibboleth-options', 'shibboleth_options_page' );
-	add_contextual_help($hookname, shibboleth_help_text());
+
+	$screen = WP_Screen::get($hookname);
+	$screen->add_help_tab(array(
+		'title' => 'Shibboleth Help',
+		'id' => 'shibboleth-help',
+		'content' => shibboleth_help_text(),
+	));
 }
 
 /**
@@ -24,9 +30,15 @@ function shibboleth_admin_panels() {
  * @action: network_admin_menu
  **/
 function shibboleth_network_admin_panels() {
-	$hookname = add_submenu_page('settings.php', __('Shibboleth options', 'shibboleth'), 
+	$hookname = add_submenu_page('settings.php', __('Shibboleth options', 'shibboleth'),
 		__('Shibboleth', 'shibboleth'), 'manage_network_options', 'shibboleth-options', 'shibboleth_options_page' );
-	add_contextual_help($hookname, shibboleth_help_text());
+
+	$screen = WP_Screen::get($hookname);
+	$screen->add_help_tab(array(
+		'title' => 'Shibboleth Help',
+		'id' => 'shibboleth-help',
+		'content' => shibboleth_help_text(),
+	));
 }
 
 
@@ -40,7 +52,7 @@ function shibboleth_help_text() {
 		<li><a href="https://spaces.internet2.edu/display/SHIB2/" target="_blank">' . __('Shibboleth 2 Wiki', 'shibboleth') . '</a></li>
 		<li><a href="http://shibboleth.internet2.edu/lists.html" target="_blank">' . __('Shibboleth Mailing Lists', 'shibboleth') . '</a></li>
 	</ul>';
-	
+
 	return apply_filters( 'shibboleth_help_text_filter', $text );
 
 }
@@ -87,7 +99,7 @@ function shibboleth_options_page() {
 		shibboleth_update_option('shibboleth_auto_login', (boolean) $_POST['auto_login']);
 		shibboleth_update_option('shibboleth_update_users', (boolean) $_POST['update_users']);
 		shibboleth_update_option('shibboleth_update_roles', (boolean) $_POST['update_roles']);
-		
+
 		/**
 		 * action shibboleth_form_submit
 		 * @since 1.4
@@ -121,7 +133,7 @@ function shibboleth_options_page() {
 						<?php _e('This URL is constructed from values found in your main Shibboleth'
 							. ' SP configuration file: your site hostname, the Sessions handlerURL,'
 							. ' and the SessionInitiator Location.', 'shibboleth'); ?>
-						<br /><?php _e('Wiki Documentation', 'shibboleth') ?>: 
+						<br /><?php _e('Wiki Documentation', 'shibboleth') ?>:
 						<a href="https://spaces.internet2.edu/display/SHIB/SessionInitiator" target="_blank">Shibboleth 1.3</a> |
 						<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPSessionInitiator" target="_blank">Shibboleth 2</a>
 					</td>
@@ -134,7 +146,7 @@ function shibboleth_options_page() {
 							. ' SP configuration file: your site hostname, the Sessions handlerURL,'
 							. ' and the LogoutInitiator Location (also known as the'
 							. ' SingleLogoutService Location in Shibboleth 1.3).', 'shibboleth'); ?>
-						<br /><?php _e('Wiki Documentation', 'shibboleth') ?>: 
+						<br /><?php _e('Wiki Documentation', 'shibboleth') ?>:
 						<a href="https://spaces.internet2.edu/display/SHIB/SPMainConfig" target="_blank">Shibboleth 1.3</a> |
 						<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPLogoutInitiator" target="_blank">Shibboleth 2</a>
 					</td>
@@ -179,7 +191,7 @@ function shibboleth_options_page() {
 	 * action shibboleth_options_table
 	 * Add your own Shibboleth options items to the Shibboleth options table.
 	 * Note: This is in a <table> so add a <tr> with appropriate styling.
-	 * 
+	 *
 	 * @param $shib_headers array
 	 * @param $shib_roles array
 	 * @since 1.4
@@ -197,7 +209,7 @@ function shibboleth_options_page() {
 				. ' <code>AAP.xml</code> (for Shibboleth 1.x).', 'shibboleth') ?></p>
 
 			<p>
-				<?php _e('Wiki Documentation', 'shibboleth') ?>: 
+				<?php _e('Wiki Documentation', 'shibboleth') ?>:
 				<a href="https://spaces.internet2.edu/display/SHIB/AttributeAcceptancePolicy" target="_blank">Shibboleth 1.3</a> |
 				<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPAddAttribute" target="_blank">Shibboleth 2</a>
 			</p>
@@ -205,43 +217,43 @@ function shibboleth_options_page() {
 			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5">
 				<tr valign="top">
 					<th scope="row"><label for="username"><?php _e('Username') ?></label</th>
-					<td><input type="text" id="username" name="headers[username][name]" value="<?php echo 
+					<td><input type="text" id="username" name="headers[username][name]" value="<?php echo
 						$shib_headers['username']['name'] ?>" /></td>
 					<td width="60%"></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="first_name"><?php _e('First name') ?></label</th>
-					<td><input type="text" id="first_name" name="headers[first_name][name]" value="<?php echo 
+					<td><input type="text" id="first_name" name="headers[first_name][name]" value="<?php echo
 						$shib_headers['first_name']['name'] ?>" /></td>
-					<td><input type="checkbox" id="first_name_managed" name="headers[first_name][managed]" <?php 
+					<td><input type="checkbox" id="first_name_managed" name="headers[first_name][managed]" <?php
 						checked($shib_headers['first_name']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="last_name"><?php _e('Last name') ?></label</th>
-					<td><input type="text" id="last_name" name="headers[last_name][name]" value="<?php echo 
+					<td><input type="text" id="last_name" name="headers[last_name][name]" value="<?php echo
 						$shib_headers['last_name']['name'] ?>" /></td>
-					<td><input type="checkbox" id="last_name_managed" name="headers[last_name][managed]" <?php 
+					<td><input type="checkbox" id="last_name_managed" name="headers[last_name][managed]" <?php
 						checked($shib_headers['last_name']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="nickname"><?php _e('Nickname') ?></label</th>
-					<td><input type="text" id="nickname" name="headers[nickname][name]" value="<?php echo 
+					<td><input type="text" id="nickname" name="headers[nickname][name]" value="<?php echo
 						$shib_headers['nickname']['name'] ?>" /></td>
-					<td><input type="checkbox" id="nickname_managed" name="headers[nickname][managed]" <?php 
+					<td><input type="checkbox" id="nickname_managed" name="headers[nickname][managed]" <?php
 						checked($shib_headers['nickname']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="_display_name"><?php _e('Display name', 'shibboleth') ?></label</th>
-					<td><input type="text" id="_display_name" name="headers[display_name][name]" value="<?php echo 
+					<td><input type="text" id="_display_name" name="headers[display_name][name]" value="<?php echo
 						$shib_headers['display_name']['name'] ?>" /></td>
-					<td><input type="checkbox" id="display_name_managed" name="headers[display_name][managed]" <?php 
+					<td><input type="checkbox" id="display_name_managed" name="headers[display_name][managed]" <?php
 						checked($shib_headers['display_name']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 				<tr valign="top">
 					<th scope="row"><label for="email"><?php _e('Email Address', 'shibboleth') ?></label</th>
-					<td><input type="text" id="email" name="headers[email][name]" value="<?php echo 
+					<td><input type="text" id="email" name="headers[email][name]" value="<?php echo
 						$shib_headers['email']['name'] ?>" /></td>
-					<td><input type="checkbox" id="email_managed" name="headers[email][managed]" <?php 
+					<td><input type="checkbox" id="email_managed" name="headers[email][managed]" <?php
 						checked($shib_headers['email']['managed'], 'on') ?> /> <?php _e('Managed', 'shibboleth') ?></td>
 				</tr>
 			</table>
@@ -259,11 +271,11 @@ function shibboleth_options_page() {
 /**
  * filter shibboleth_role_mapping_override
  * Return true to override the default user role mapping form
- * 
+ *
  * @param boolean - default value false
  * @return boolean - true if override
  * @since 1.4
- * 
+ *
  * Use in conjunction with shibboleth_role_mapping_form action below
  */
 if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
@@ -310,7 +322,7 @@ if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
 					foreach ($wp_roles->role_names as $key => $name) {
 						echo'
 						<tr valign="top">
-							<th scope="row">' . _c($name) . '</th>
+							<th scope="row">' . __($name) . '</th>
 							<td><input type="text" id="role_'.$key.'_header" name="shibboleth_roles['.$key.'][header]" value="' . @$shib_roles[$key]['header'] . '" style="width: 100%" /></td>
 							<td><input type="text" id="role_'.$key.'_value" name="shibboleth_roles['.$key.'][value]" value="' . @$shib_roles[$key]['value'] . '" style="width: 100%" /></td>
 						</tr>';
@@ -330,7 +342,7 @@ if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
 <?php
 			foreach ($wp_roles->role_names as $key => $name) {
 				echo '
-						<option value="' . $key . '"' . ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>' . _c($name) . '</option>';
+						<option value="' . $key . '"' . ($shib_roles['default'] == $key ? ' selected="selected"' : '') . '>' . __($name) . '</option>';
 			}
 ?>
 						</select>
@@ -356,15 +368,15 @@ if ( apply_filters('shibboleth_role_mapping_override',false) === false ):
 			</table>
 
 <?php
-else: 
+else:
 	/**
 	 * action shibboleth_role_mapping_form
 	 * Roll your own custom Shibboleth role mapping admin UI
-	 * 
+	 *
 	 * @param $shib_headers array
 	 * @param $shib_roles array
 	 * @since 1.4
-	 * 
+	 *
 	 * Use in conjunction with shibboleth_role_mapping_override filter
 	 */
 	do_action( 'shibboleth_role_mapping_form', $shib_headers, $shib_roles );
