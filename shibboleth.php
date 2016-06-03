@@ -171,7 +171,11 @@ function shibboleth_authenticate($user, $username, $password) {
 	if ( shibboleth_session_active() ) {
 		return shibboleth_authenticate_user();
 	} else {
-		$initiator_url = shibboleth_session_initiator_url( $_REQUEST['redirect_to'] );
+		if (isset( $_REQUEST['redirect_to'] )) {
+			$initiator_url = shibboleth_session_initiator_url( $_REQUEST['redirect_to'] );
+		} else {
+			$initiator_url = shibboleth_session_initiator_url();
+		}
 		wp_redirect($initiator_url);
 		exit;
 	}
@@ -197,7 +201,7 @@ function shibboleth_retrieve_password( $user_login ) {
 
 	if ( !empty($password_reset_url) ) {
 		$user = get_userdatabylogin($user_login);
-		if ( $user && get_usermeta($user->ID, 'shibboleth_account') ) {
+		if ( $user && get_user_meta($user->ID, 'shibboleth_account') ) {
 			wp_redirect($password_reset_url);
 			exit;
 		}
@@ -246,7 +250,11 @@ function shibboleth_session_initiator_url($redirect = null) {
 
 	// first build the target URL.  This is the WordPress URL the user will be returned to after Shibboleth 
 	// is done, and will handle actually logging the user into WordPress using the data provdied by Shibboleth 
-	if ( function_exists('switch_to_blog') ) switch_to_blog($GLOBALS['current_site']->blog_id);
+	if ( function_exists('switch_to_blog') ) {
+		if ( is_multisite() ) switch_to_blog($GLOBALS['current_blog']->blog_id);
+		else switch_to_blog($GLOBALS['current_site']->blog_id);
+	}
+
 	$target = site_url('wp-login.php');
 	if ( function_exists('restore_current_blog') ) restore_current_blog();
 
@@ -290,21 +298,22 @@ function shibboleth_authenticate_user() {
 	}
 
 	$username = $_SERVER[$shib_headers['username']['name']];
-	$user = new WP_User($username);
+	//$user = new WP_User($username);
+	$user = get_user_by('login', $username);
 
-	if ( $user->ID ) {
-		if ( !get_usermeta($user->ID, 'shibboleth_account') ) {
+	if ( $user ) {
+		if ( !get_user_meta($user->ID, 'shibboleth_account') ) {
 			// TODO: what happens if non-shibboleth account by this name already exists?
 			//return new WP_Error('invalid_username', __('Account already exists by this name.'));
 		}
 	}
 
 	// create account if new user
-	if ( !$user->ID ) {
+	if ( !$user ) {
 		$user = shibboleth_create_new_user($username);
 	}
 
-	if ( !$user->ID ) {
+	if ( !$user ) {
 		$error_message = 'Unable to create account based on data provided.';
 		if (defined('WP_DEBUG') && WP_DEBUG) {
 			$error_message .= '<!-- ' . print_r($_SERVER, true) . ' -->';
@@ -313,7 +322,7 @@ function shibboleth_authenticate_user() {
 	}
 
 	// update user data
-	update_usermeta($user->ID, 'shibboleth_account', true);
+	update_user_meta($user->ID, 'shibboleth_account', true);
 	shibboleth_update_user_data($user->ID);
 	if ( shibboleth_get_option('shibboleth_update_roles') ) {
 		$user->set_role($user_role);
@@ -334,10 +343,9 @@ function shibboleth_create_new_user($user_login) {
 	if ( empty($user_login) ) return null;
 
 	// create account and flag as a shibboleth acount
-	require_once( ABSPATH . WPINC . '/registration.php' );
-	$user_id = wp_insert_user(array('user_login'=>$user_login));
+	$user_id = wp_insert_user(array('user_login'=>$user_login, 'user_pass' => NULL));
 	$user = new WP_User($user_id);
-	update_usermeta($user->ID, 'shibboleth_account', true);
+	update_user_meta($user->ID, 'shibboleth_account', true);
 
 	// always update user data and role on account creation
 	shibboleth_update_user_data($user->ID, true);
@@ -371,7 +379,7 @@ function shibboleth_get_user_role() {
 
 		if ( empty($role_header) || empty($role_value) ) continue;
 
-		$values = split(';', $_SERVER[$role_header]);
+		$values = explode(';', $_SERVER[$role_header]);
 		if ( in_array($role_value, $values) ) {
 			$user_role = $key;
 			break;
@@ -394,8 +402,10 @@ function shibboleth_get_managed_user_fields() {
 	$managed = array();
 
 	foreach ($headers as $name => $value) {
-		if ( $value['managed'] ) {
-			$managed[] = $name;
+		if (isset($value['managed'])) {
+			if ( $value['managed'] ) {
+				$managed[] = $name;
+			}
 		}
 	}
 
@@ -415,7 +425,6 @@ function shibboleth_get_managed_user_fields() {
  *       nickname, display_name, email
  */
 function shibboleth_update_user_data($user_id, $force_update = false) {
-	require_once( ABSPATH . WPINC . '/registration.php' );
 
 	$shib_headers = shibboleth_get_option('shibboleth_headers');
 
@@ -434,7 +443,11 @@ function shibboleth_update_user_data($user_id, $force_update = false) {
 	);
 	
 	foreach ($user_fields as $field => $header) {
-		if ( $force_update || $shib_headers[$header]['managed'] ) {
+		$managed = false;
+		if (isset($shib_headers[$header]['managed'])) {
+			$managed = $shib_headers[$header]['managed'];
+		}
+		if ( $force_update || $managed ) {
 			$filter = 'shibboleth_' . ( strpos($field, 'user_') === 0 ? '' : 'user_' ) . $field;
 			$user_data[$field] = apply_filters($filter, $_SERVER[$shib_headers[$header]['name']]);
 		}
