@@ -95,10 +95,10 @@ function shibboleth_options_page() {
 		shibboleth_update_option('shibboleth_logout_url', $_POST['logout_url']);
 		shibboleth_update_option('shibboleth_password_change_url', $_POST['password_change_url']);
 		shibboleth_update_option('shibboleth_password_reset_url', $_POST['password_reset_url']);
-		shibboleth_update_option('shibboleth_default_login', (boolean) $_POST['default_login']);
-		shibboleth_update_option('shibboleth_auto_login', (boolean) $_POST['auto_login']);
-		shibboleth_update_option('shibboleth_update_users', (boolean) $_POST['update_users']);
-		shibboleth_update_option('shibboleth_update_roles', (boolean) $_POST['update_roles']);
+		shibboleth_update_option('shibboleth_default_login', isset($_POST['default_login']));
+		shibboleth_update_option('shibboleth_auto_login', isset($_POST['auto_login']));
+		shibboleth_update_option('shibboleth_update_users', isset($_POST['update_users']));
+		shibboleth_update_option('shibboleth_update_roles', isset($_POST['update_roles']));
 
 		/**
 		 * action shibboleth_form_submit
