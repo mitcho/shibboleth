@@ -290,6 +290,18 @@ function shibboleth_authenticate_user() {
 	}
 
 	$username = $_SERVER[$shib_headers['username']['name']];
+
+	/**
+	 * Filters whether the given Shibboleth user should be authenticated by WP.
+	 *
+	 * Return false to prevent the authentication of an existing user or the
+	 * provisioning of a new user.
+	 */
+	$authenticate = apply_filters( 'shibboleth_authenticate_user', true, $username );
+	if ( false === $authenticate ) {
+		return null;
+	}
+
 	$user = new WP_User($username);
 
 	if ( $user->ID ) {
