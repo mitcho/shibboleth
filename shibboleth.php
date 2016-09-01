@@ -292,14 +292,18 @@ function shibboleth_authenticate_user() {
 	$username = $_SERVER[$shib_headers['username']['name']];
 
 	/**
-	 * Filters whether the given Shibboleth user should be authenticated by WP.
+	 * Allows a bypass mechanism for native Shibboleth authentication.
 	 *
-	 * Return false to prevent the authentication of an existing user or the
-	 * provisioning of a new user.
+	 * Returning a non-null value from this filter will result in your value being
+	 * returned to WordPress. You can prevent a user from being authenticated
+	 * by returning a WP_Error object.
+	 *
+	 * @param null   $auth
+	 * @param string $username
 	 */
-	$authenticate = apply_filters( 'shibboleth_authenticate_user', true, $username );
-	if ( false === $authenticate ) {
-		return null;
+	$authenticate = apply_filters( 'shibboleth_authenticate_user', null, $username );
+	if ( null !== $authenticate ) {
+		return $authenticate;
 	}
 
 	$user = new WP_User($username);
