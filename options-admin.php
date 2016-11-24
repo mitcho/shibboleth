@@ -49,7 +49,7 @@ function shibboleth_help_text() {
 	$text = '
 	<ul>
 		<li><a href="https://spaces.internet2.edu/display/SHIB/" target="_blank">' . __('Shibboleth 1.3 Wiki', 'shibboleth') . '</a></li>
-		<li><a href="https://spaces.internet2.edu/display/SHIB2/" target="_blank">' . __('Shibboleth 2 Wiki', 'shibboleth') . '</a></li>
+		<li><a href="https://wiki.shibboleth.net/confluence/display/SHIB2/" target="_blank">' . __('Shibboleth 2 Wiki', 'shibboleth') . '</a></li>
 		<li><a href="http://shibboleth.internet2.edu/lists.html" target="_blank">' . __('Shibboleth Mailing Lists', 'shibboleth') . '</a></li>
 	</ul>';
 
@@ -135,7 +135,7 @@ function shibboleth_options_page() {
 							. ' and the SessionInitiator Location.', 'shibboleth'); ?>
 						<br /><?php _e('Wiki Documentation', 'shibboleth') ?>:
 						<a href="https://spaces.internet2.edu/display/SHIB/SessionInitiator" target="_blank">Shibboleth 1.3</a> |
-						<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPSessionInitiator" target="_blank">Shibboleth 2</a>
+						<a href="https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPSessionInitiator" target="_blank">Shibboleth 2</a>
 					</td>
 				</tr>
 				<tr valign="top">
@@ -148,7 +148,7 @@ function shibboleth_options_page() {
 							. ' SingleLogoutService Location in Shibboleth 1.3).', 'shibboleth'); ?>
 						<br /><?php _e('Wiki Documentation', 'shibboleth') ?>:
 						<a href="https://spaces.internet2.edu/display/SHIB/SPMainConfig" target="_blank">Shibboleth 1.3</a> |
-						<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPLogoutInitiator" target="_blank">Shibboleth 2</a>
+						<a href="https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPServiceLogout" target="_blank">Shibboleth 2</a>
 					</td>
 				</tr>
 				<tr valign="top">
@@ -211,7 +211,7 @@ function shibboleth_options_page() {
 			<p>
 				<?php _e('Wiki Documentation', 'shibboleth') ?>:
 				<a href="https://spaces.internet2.edu/display/SHIB/AttributeAcceptancePolicy" target="_blank">Shibboleth 1.3</a> |
-				<a href="https://spaces.internet2.edu/display/SHIB2/NativeSPAddAttribute" target="_blank">Shibboleth 2</a>
+				<a href="https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPAddAttribute" target="_blank">Shibboleth 2</a>
 			</p>
 
 			<table class="form-table optiontable editform" cellspacing="2" cellpadding="5">

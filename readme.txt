@@ -12,7 +12,7 @@ Shibboleth Service Provider.
 
 This plugin is designed to support integrating your WordPress or WordPress MU
 blog into your existing identity management infrastructure using a
-[Shibboleth][] Service Provider.  
+[Shibboleth][] Service Provider.
 
 WordPress can be configured so that all standard login requests will be sent to
 your configured Shibboleth Identity Provider or Discovery Service.  Upon
@@ -20,7 +20,7 @@ successful authentication, a new WordPress account will be automatically
 provisioned for the user if one does not already exist.  User attributes
 (username, first name, last name, display name, nickname, and email address)
 can be synchronized with your enterprise's system of record each time the user
-logs into WordPress.  
+logs into WordPress.
 
 Finally, the user's role within WordPress can be automatically set (and
 continually updated) based on any attribute Shibboleth provides.  For example,
@@ -33,7 +33,7 @@ access to WordPress altogether using a special eduPersonEntitlement value.
 
 = Contribute on GitHub =
 
-This plugin is actively maintained by the community, [using 
+This plugin is actively maintained by the community, [using
 GitHub](https://github.com/mitcho/shibboleth). Contributions are welcome, via
 pull request, [on GitHub](https://github.com/mitcho/shibboleth). Issues can be
 submitted [on the issue tracker](https://github.com/mitcho/shibboleth/issues).
@@ -55,7 +55,7 @@ The option to automatically login the users into WordPress also works when not
 using the lazy session options as it will force login into WordPress. In other
 words, if the user has an active session and you are requiring authentication
 to access this WordPress site and they need to be logged into WordPress, then
-they will be logged in without having to use the WordPress login page. 
+they will be logged in without having to use the WordPress login page.
 
 This works very well for sites that use WordPress for internal ticketing and
 helpdesk functions where any access to content requires authentication.
@@ -99,13 +99,29 @@ the `shibboleth` folder up one directory so that it is in `mu-plugins`
 alongside the `shibboleth` folder.  No need to activate it, just configure it
 from the Shibboleth settings page, found under "Site Admin".
 
+If using this method you will need to manually update .htaccess as activation
+hooks are not executed when using the mu-plugins folder.
+
+    AuthType shibboleth
+    Require shibboleth
+
+In a multisite setup with subdirectories you'll also need to update `.htaccess`
+to properly allow access to /Shibboleth.sso. [Ohio State University shared][] the
+example below for doing so:
+
+    # Shibboleth quick-exit
+    RewriteEngine on
+    RewriteCond %{REQUEST_URI} ^/Shibboleth.sso($|/)
+    RewriteRule . - [L]
+
 [properly installed]: https://spaces.internet2.edu/display/SHIB2/Installation
+[Ohio State University shared]: https://web.osu.edu/technical-support/wordpress/wordpress-shib/
 
 == Frequently Asked Questions ==
 
 = What is Shibboleth? =
 
-From [the Shibboleth homepage][]: 
+From [the Shibboleth homepage][]:
 
 > The Shibboleth System is a standards based, open source software package for
 > web single sign-on across or within organizational boundaries. It allows
@@ -165,7 +181,7 @@ have to make that call as to what is most appropriate.
  - new hooks for developers to override the default user role mapping controls
  - now applies `sanitize_name()` to the Shibboleth user's `nicename` column
 
-= version 1.3 (2009-10-02) = 
+= version 1.3 (2009-10-02) =
  - required WordPress version bumped to 2.8
  - much cleaner integration with WordPress authentication system
  - individual user profile fields can be designated as managed by Shibboleth
@@ -192,4 +208,3 @@ have to make that call as to what is most appropriate.
 
 = version 0.1 =
  - initial public release
-
